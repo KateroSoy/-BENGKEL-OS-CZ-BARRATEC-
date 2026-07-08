@@ -3,10 +3,7 @@ import { handleCors } from '../_utils';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   if (handleCors(req, res)) return;
-  
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { email, password } = req.body;
   if (email === "admin@bengkel.com" && password === "admin123") {

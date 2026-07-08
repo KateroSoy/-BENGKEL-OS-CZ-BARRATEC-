@@ -1,35 +1,18 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { handleCors } from './_utils';
-import { db } from '../src/db';
-import { bookings } from '../src/db/schema';
-import { and, eq, gte, lte, asc } from 'drizzle-orm';
+import { getBookings } from './_data';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req: VercelRequest, res: VercelResponse) {
   if (handleCors(req, res)) return;
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  let results = getBookings();
+  const { start, end, status } = req.query;
 
-  try {
-    const { start, end, status } = req.query;
-    let conditions: any[] = [];
+  if (start) results = results.filter(b => b.bookingDate >= (start as string));
+  if (end) results = results.filter(b => b.bookingDate <= (end as string));
+  if (status) results = results.filter(b => b.status === status);
 
-    if (start) conditions.push(gte(bookings.bookingDate, start as string));
-    if (end) conditions.push(lte(bookings.bookingDate, end as string));
-    if (status) conditions.push(eq(bookings.status, status as string));
-
-    const query = db.select()
-      .from(bookings)
-      .orderBy(asc(bookings.bookingDate), asc(bookings.bookingTime));
-
-    if (conditions.length > 0) {
-      query.where(and(...conditions));
-    }
-
-    const results = await query;
-    res.json(results);
-  } catch (err) {
-    res.status(500).json({ error: String(err) });
-  }
+  results.sort((a, b) => a.bookingDate.localeCompare(b.bookingDate) || a.bookingTime.localeCompare(b.bookingTime));
+  res.json(results);
 }
