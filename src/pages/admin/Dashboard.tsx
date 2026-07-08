@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, CheckCircle2, Clock, FileText, PlusCircle, Wrench, ArrowRight, Activity, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
+import { getDashboardStats } from "../../lib/mockApi";
 
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
-    fetch("/api/dashboard/stats").then(res => res.json()).then(setStats);
+    setStats(getDashboardStats());
   }, []);
 
   const getStatusCount = (statusName: string) => {

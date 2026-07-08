@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { StatusBadge } from "../../components/ui/core";
 import { Search, MessageCircle, Calendar, Filter, MoreHorizontal, FileText, ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
+import { getBookings, getServices, getTechnicians } from "../../lib/mockApi";
 
 export default function BookingsToday() {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -19,8 +20,8 @@ export default function BookingsToday() {
 
   useEffect(() => {
     loadBookings();
-    fetch("/api/services").then(res => res.json()).then(data => setServices(Array.isArray(data) ? data : []));
-    fetch("/api/technicians").then(res => res.json()).then(data => setTechnicians(Array.isArray(data) ? data : []));
+    setServices(getServices());
+    setTechnicians(getTechnicians());
   }, []);
 
   // Debounced search effect
@@ -34,19 +35,15 @@ export default function BookingsToday() {
   const loadBookings = () => {
     setLoading(true);
     const today = format(new Date(), "yyyy-MM-dd");
-    let url = `/api/bookings?date=${today}`;
-    if (search) url += `&search=${encodeURIComponent(search)}`;
-    if (statusFilter) url += `&status=${encodeURIComponent(statusFilter)}`;
-    if (serviceFilter) url += `&serviceType=${encodeURIComponent(serviceFilter)}`;
-    if (techFilter) url += `&technicianId=${encodeURIComponent(techFilter)}`;
-
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        setBookings(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    const data = getBookings({
+      date: today,
+      search: search || undefined,
+      status: statusFilter || undefined,
+      serviceType: serviceFilter || undefined,
+      technicianId: techFilter || undefined,
+    });
+    setBookings(data);
+    setLoading(false);
   };
 
   const handleNotify = (phone: string, name: string, carType: string) => {

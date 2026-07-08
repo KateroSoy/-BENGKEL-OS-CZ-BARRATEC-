@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Save, Settings as SettingsIcon, Building, Clock, MapPin, Phone } from "lucide-react";
 import { motion } from "motion/react";
+import { getSettings, updateSettings } from "../../lib/mockApi";
 
 export default function Settings() {
   const [settings, setSettings] = useState<any>(null);
@@ -8,30 +9,22 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/settings")
-      .then(res => res.json())
-      .then(data => {
-        setSettings(data);
-        setLoading(false);
-      });
+    setSettings(getSettings());
+    setLoading(false);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
     const fd = new FormData(e.currentTarget);
     const data = Object.fromEntries(fd.entries()) as any;
-    
+
     // Convert numeric fields
     data.maxBookingPerSlot = Number(data.maxBookingPerSlot);
     data.slotIntervalMinutes = Number(data.slotIntervalMinutes);
 
-    await fetch("/api/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    
+    updateSettings(data);
+    setSettings(getSettings());
     alert("Pengaturan berhasil disimpan.");
     setSaving(false);
   };

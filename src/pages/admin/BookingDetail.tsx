@@ -6,6 +6,7 @@ import { ArrowLeft, MessageCircle, Clock, User, Wrench, FileText, ChevronRight }
 import { createWhatsAppLink } from "../../lib/utils";
 import { WhatsAppHelper } from "../../utils/whatsapp";
 import { motion } from "motion/react";
+import { getBookingById, getTechnicians, updateBookingStatus, updateBookingTechnician } from "../../lib/mockApi";
 
 const statuses = [
   "Baru", "Menunggu Konfirmasi", "Terkonfirmasi", "Datang", 
@@ -47,38 +48,28 @@ export default function BookingDetail() {
 
   useEffect(() => {
     loadBooking();
-    fetch("/api/technicians").then(res => res.json()).then(data => setTechnicians(Array.isArray(data) ? data : []));
+    setTechnicians(getTechnicians());
   }, [id]);
 
   const loadBooking = () => {
     setLoading(true);
-    fetch(`/api/bookings/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setBooking(data);
-        setLoading(false);
-      });
+    setBooking(id ? getBookingById(id) : null);
+    setLoading(false);
   };
 
-  const updateStatus = async (newStatus: string) => {
+  const updateStatus = (newStatus: string) => {
     const note = prompt("Catatan (opsional):");
-    if (note !== null) {
-      await fetch(`/api/bookings/${id}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus, note })
-      });
+    if (note !== null && id) {
+      updateBookingStatus(id, newStatus, note);
       loadBooking();
     }
   };
 
-  const updateTechnician = async (technicianId: string) => {
-    await fetch(`/api/bookings/${id}/technician`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ technicianId })
-    });
-    loadBooking();
+  const updateTechnician = (technicianId: string) => {
+    if (id) {
+      updateBookingTechnician(id, technicianId);
+      loadBooking();
+    }
   };
 
   const handleWA = (type: string) => {

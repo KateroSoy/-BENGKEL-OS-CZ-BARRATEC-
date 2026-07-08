@@ -6,6 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
+import { getReports } from "../../lib/mockApi";
 
 // Mock Data
 const generateMockTrend = () => {
@@ -45,16 +46,8 @@ export default function Reports() {
 
   const loadReports = () => {
     setLoading(true);
-    let url = `/api/reports?start=${startDate}&end=${endDate}`;
-    if (statusFilter) url += `&status=${statusFilter}`;
-    
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        setBookings(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    setBookings(getReports({ start: startDate, end: endDate, status: statusFilter || undefined }));
+    setLoading(false);
   };
 
   const handlePrint = () => {

@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Calendar, Clock, Wrench, User, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { createPublicBooking, getActiveServices, getSettings, getSlotInfo } from "../../lib/mockApi";
 
 export default function BookingForm() {
   const navigate = useNavigate();
@@ -16,52 +17,40 @@ export default function BookingForm() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/settings/public").then(res => res.json()).then(setSettings);
-    fetch("/api/services/public").then(res => res.json()).then(data => setServices(Array.isArray(data) ? data : []));
+    setSettings(getSettings());
+    setServices(getActiveServices());
   }, []);
 
   useEffect(() => {
     if (date && settings) {
-      fetch(`/api/slots?date=${date}`).then(res => res.json()).then(data => {
-        const slots = [];
-        const start = parseInt(data.settings.openTime.split(":")[0]);
-        const end = parseInt(data.settings.closeTime.split(":")[0]);
-        const interval = data.settings.slotIntervalMinutes;
-        
-        for (let i = start; i < end; i += (interval/60)) {
-          const timeString = `${String(Math.floor(i)).padStart(2, '0')}:${String((i % 1) * 60).padStart(2, '0')}`;
-          const bookedCount = data.bookings.find((b: any) => b.time === timeString)?.count || 0;
-          slots.push({
-            time: timeString,
-            isFull: bookedCount >= data.settings.maxBookingPerSlot,
-            available: data.settings.maxBookingPerSlot - bookedCount
-          });
-        }
-        setAvailableSlots(slots);
-      });
+      const data = getSlotInfo(date);
+      const slots = [];
+      const start = parseInt(data.settings.openTime.split(":")[0]);
+      const end = parseInt(data.settings.closeTime.split(":")[0]);
+      const interval = data.settings.slotIntervalMinutes;
+
+      for (let i = start; i < end; i += (interval/60)) {
+        const timeString = `${String(Math.floor(i)).padStart(2, '0')}:${String((i % 1) * 60).padStart(2, '0')}`;
+        const bookedCount = data.bookings.find((b: any) => b.time === timeString)?.count || 0;
+        slots.push({
+          time: timeString,
+          isFull: bookedCount >= data.settings.maxBookingPerSlot,
+          available: data.settings.maxBookingPerSlot - bookedCount
+        });
+      }
+      setAvailableSlots(slots);
     }
   }, [date, settings]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const fd = new FormData(e.currentTarget);
     const data = Object.fromEntries(fd.entries());
-    
-    try {
-      const res = await fetch("/api/bookings/public", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (res.ok) {
-        navigate("/booking/success");
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+
+    createPublicBooking(data);
+    setLoading(false);
+    navigate("/booking/success");
   };
 
   if (!settings) {

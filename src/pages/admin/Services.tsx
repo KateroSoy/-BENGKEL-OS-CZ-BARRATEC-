@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Wrench, Users, Plus } from "lucide-react";
 import { motion } from "motion/react";
+import { addService, addTechnician, getServices, getTechnicians } from "../../lib/mockApi";
 
 export default function Services() {
   const [services, setServices] = useState<any[]>([]);
@@ -13,36 +14,23 @@ export default function Services() {
 
   const loadData = () => {
     setLoading(true);
-    Promise.all([
-      fetch("/api/services").then(res => res.json()),
-      fetch("/api/technicians").then(res => res.json())
-    ]).then(([s, t]) => {
-      setServices(Array.isArray(s) ? s : []);
-      setTechnicians(Array.isArray(t) ? t : []);
-      setLoading(false);
-    });
+    setServices(getServices());
+    setTechnicians(getTechnicians());
+    setLoading(false);
   };
 
-  const handleAddService = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAddService = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    await fetch("/api/services", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.fromEntries(fd.entries()))
-    });
+    addService(Object.fromEntries(fd.entries()) as { name: string });
     e.currentTarget.reset();
     loadData();
   };
 
-  const handleAddTech = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAddTech = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    await fetch("/api/technicians", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.fromEntries(fd.entries()))
-    });
+    addTechnician(Object.fromEntries(fd.entries()) as { name: string; specialty?: string });
     e.currentTarget.reset();
     loadData();
   };

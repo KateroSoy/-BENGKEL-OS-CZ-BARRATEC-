@@ -3,6 +3,7 @@ import { format, addDays, subDays } from "date-fns";
 import { Card, CardContent, StatusBadge } from "../../components/ui/core";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getBookings } from "../../lib/mockApi";
 
 export default function Calendar() {
   const [date, setDate] = useState(new Date());
@@ -16,12 +17,8 @@ export default function Calendar() {
   const loadBookings = () => {
     setLoading(true);
     const dateStr = format(date, "yyyy-MM-dd");
-    fetch(`/api/bookings?date=${dateStr}`)
-      .then(res => res.json())
-      .then(data => {
-        setBookings(Array.isArray(data) ? data : []);
-        setLoading(false);
-      });
+    setBookings(getBookings({ date: dateStr }));
+    setLoading(false);
   };
 
   const timeSlots = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];

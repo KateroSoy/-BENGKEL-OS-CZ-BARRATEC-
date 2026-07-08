@@ -3,6 +3,7 @@ import { LayoutDashboard, Calendar as CalendarIcon, Users, Settings, LogOut, Wre
 import { cn } from "../../lib/utils";
 import { useState, useEffect } from "react";
 import { ProductTour } from "../../components/ProductTour";
+import { logout as mockLogout } from "../../lib/mockApi";
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -33,8 +34,8 @@ export default function AdminLayout() {
     localStorage.setItem('bw_tour_completed', 'true');
   };
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
+  const handleLogout = () => {
+    mockLogout();
     navigate('/admin/login');
   };
 

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, Input, Label, Select, Textarea, Button } from "../../components/ui/core";
 import { ArrowLeft } from "lucide-react";
+import { createBooking, getActiveServices } from "../../lib/mockApi";
 
 export default function ManualBooking() {
   const navigate = useNavigate();
@@ -10,30 +11,18 @@ export default function ManualBooking() {
   const [services, setServices] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("/api/services/public").then(res => res.json()).then(data => setServices(Array.isArray(data) ? data : []));
+    setServices(getActiveServices());
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const fd = new FormData(e.currentTarget);
     const data = Object.fromEntries(fd.entries());
-    
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (res.ok) {
-        const { id } = await res.json();
-        navigate(`/admin/bookings/${id}`);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+
+    const { id } = createBooking(data);
+    setLoading(false);
+    navigate(`/admin/bookings/${id}`);
   };
 
   return (

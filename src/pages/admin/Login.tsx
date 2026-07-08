@@ -2,37 +2,27 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShieldCheck, ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
+import { login } from "../../lib/mockApi";
 
 export default function Login() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     const fd = new FormData(e.currentTarget);
-    const data = Object.fromEntries(fd.entries());
-    
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (res.ok) {
-        navigate("/admin/dashboard");
-      } else {
-        const result = await res.json();
-        setError(result.error || "Login gagal");
-      }
-    } catch (err) {
-      setError("Terjadi kesalahan jaringan");
-    } finally {
-      setLoading(false);
+    const data = Object.fromEntries(fd.entries()) as { email: string; password: string };
+
+    if (login(data.email, data.password)) {
+      navigate("/admin/dashboard");
+    } else {
+      setError("Invalid credentials");
     }
+    setLoading(false);
   };
 
   return (
