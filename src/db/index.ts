@@ -1,10 +1,13 @@
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from './schema';
-import path from 'path';
 
-// Define the DB path
-const dbPath = path.resolve(process.cwd(), 'sqlite.db');
-const sqlite = new Database(dbPath);
+// Use POSTGRES_URL (set by Vercel/Neon integration) or DATABASE_URL
+const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
-export const db = drizzle(sqlite, { schema });
+if (!connectionString) {
+  throw new Error('POSTGRES_URL or DATABASE_URL environment variable is required');
+}
+
+const sql = neon(connectionString);
+export const db = drizzle(sql, { schema });

@@ -1,41 +1,41 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { pgTable, text, integer, boolean, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 // users table
-export const users = sqliteTable('users', {
+export const users = pgTable('users', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   role: text('role').notNull().default('admin'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // services table
-export const services = sqliteTable('services', {
+export const services = pgTable('services', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   estimatedDuration: integer('estimated_duration'), // minutes
   estimatedPrice: integer('estimated_price'),
-  isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // technicians table
-export const technicians = sqliteTable('technicians', {
+export const technicians = pgTable('technicians', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   phone: text('phone'),
   specialty: text('specialty'),
-  isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // workshop_settings table
-export const workshopSettings = sqliteTable('workshop_settings', {
+export const workshopSettings = pgTable('workshop_settings', {
   id: text('id').primaryKey(),
   workshopName: text('workshop_name').notNull(),
   phone: text('phone'),
@@ -44,13 +44,13 @@ export const workshopSettings = sqliteTable('workshop_settings', {
   closeTime: text('close_time').notNull(), // 'HH:MM'
   maxBookingPerSlot: integer('max_booking_per_slot').default(3),
   slotIntervalMinutes: integer('slot_interval_minutes').default(60),
-  operationalDays: text('operational_days', { mode: 'json' }), // array of 0-6 days
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  operationalDays: text('operational_days'), // JSON string of array of 0-6 days
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // bookings table
-export const bookings = sqliteTable('bookings', {
+export const bookings = pgTable('bookings', {
   id: text('id').primaryKey(),
   bookingCode: text('booking_code').notNull().unique(),
   customerName: text('customer_name').notNull(),
@@ -69,22 +69,17 @@ export const bookings = sqliteTable('bookings', {
   estimatedPrice: integer('estimated_price'),
   estimatedFinishTime: text('estimated_finish_time'), // ISO string
   technicianId: text('technician_id').references(() => technicians.id),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // booking_status_history table
-export const bookingStatusHistory = sqliteTable('booking_status_history', {
+export const bookingStatusHistory = pgTable('booking_status_history', {
   id: text('id').primaryKey(),
   bookingId: text('booking_id').notNull().references(() => bookings.id, { onDelete: 'cascade' }),
   oldStatus: text('old_status'),
   newStatus: text('new_status').notNull(),
   note: text('note'),
   changedBy: text('changed_by').references(() => users.id),
-  changedAt: integer('changed_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  changedAt: timestamp('changed_at').defaultNow(),
 });
-
-// Note on PostgreSQL vs SQLite:
-// The user requested PostgreSQL but explicitly disabled Cloud SQL. 
-// For a fully working persistence environment out-of-the-box on AI Studio, 
-// we use SQLite. The Drizzle ORM syntax here is largely identical and maps easily.
