@@ -1,9 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Space+Grotesk:wght@400..700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #FF6A1A;
+  --color-primary-hover: #FF7A2F;
+  --color-background: #F4F4F5;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #F9FAFB;
+  --color-text-primary: #111317;
+  --color-text-secondary: #52525B;
+  --color-border-subtle: rgba(0,0,0,0.10);
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
 }
 
 @layer utilities {
@@ -12,11 +24,11 @@
   }
   
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)];
+    @apply bg-surface-elevated/70 backdrop-blur-xl border border-[var(--color-border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.4)];
   }
   
   .premium-shadow {
-    box-shadow: 0 4px 40px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0,0,0,0.02);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0,0,0,0.2);
   }
   
   .text-balance {
@@ -55,13 +67,13 @@
 }
 
 body {
-  background-color: #FAFAFA; /* Soft clean white/gray */
-  color: #0f172a; /* Deep slate-900 */
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background-color: #dbeafe; /* Blue-100 */
-  color: #1e3a8a; /* Blue-900 */
+  background-color: var(--color-primary);
+  color: var(--color-background);
 }

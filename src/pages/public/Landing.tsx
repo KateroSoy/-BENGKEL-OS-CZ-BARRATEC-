@@ -1,172 +1,347 @@
-import { Link } from "react-router-dom";
-import { User, ShieldCheck, Wrench, ArrowRight, Zap, Star, ChevronRight } from "lucide-react";
-import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, Clock, MapPin, Phone, Menu, X, ShieldCheck, CheckCircle2, ChevronRight, Star, PenTool, ChevronDown, Check } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { getSettings, getServices, Settings, Service } from "../../lib/mockApi";
 
 export default function Landing() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2,
-      },
-    },
-  };
+  const navigate = useNavigate();
+  const [settings, setSettings] = useState<Settings | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 20 } },
-  };
+  useEffect(() => {
+    setSettings(getSettings());
+    setServices(getServices().filter(s => s.isActive));
+    
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const faqs = [
+    { q: "Apakah bisa booking tanpa login?", a: "Tentu. Anda dapat langsung melakukan booking servis melalui website tanpa perlu mendaftar atau login." },
+    { q: "Apakah booking langsung terkonfirmasi?", a: "Setelah Anda mengirim form, admin kami akan segera menghubungi Anda melalui WhatsApp untuk konfirmasi final dalam waktu 15 menit." },
+    { q: "Bagaimana jika jadwal yang dipilih penuh?", a: "Sistem kami hanya menampilkan jadwal yang masih tersedia. Namun jika ada bentrok, tim kami akan menawarkan alternatif waktu terdekat via WhatsApp." },
+    { q: "Apakah biaya servis langsung diketahui?", a: "Estimasi biaya bisa dilihat pada halaman layanan. Untuk perbaikan spesifik, teknisi kami akan memberikan estimasi pasti setelah pemeriksaan fisik." },
+    { q: "Apakah tersedia layanan antar atau jemput kendaraan?", a: "Ya, kami menyediakan layanan antar dan jemput dalam radius 10km. Anda bisa memilih opsi ini saat mengisi form booking." },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-white font-sans selection:bg-blue-500/30 selection:text-blue-200 relative overflow-hidden">
+    <div className="min-h-screen bg-white text-[#111111] font-sans overflow-x-hidden selection:bg-black selection:text-white scroll-smooth">
       
-      {/* Glossy Background Effects */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-blue-600/20 via-indigo-900/10 to-transparent blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-0 right-0 w-[600px] h-[500px] bg-gradient-to-tl from-purple-600/10 to-transparent blur-[100px] pointer-events-none"></div>
-      
-      {/* Background Image Overlay */}
-      <div 
-        className="absolute inset-0 pointer-events-none bg-cover bg-center opacity-30 mix-blend-luminosity"
-        style={{ backgroundImage: "url('/background.jpg')" }}
-      ></div>
+      {/* 1. UTILITY BAR */}
+      <div className="hidden md:flex border-b border-black/5 text-xs text-gray-500 py-2 px-6 justify-between items-center bg-white z-50 relative">
+        <div className="flex gap-8 items-center tracking-wide">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-black uppercase">Operasional</span>
+            <span>{settings?.openTime || "08:00"} – {settings?.closeTime || "17:00"} WIB</span>
+          </div>
+        </div>
+        <div className="flex gap-4 items-center tracking-wide">
+          <span className="flex items-center gap-2">
+            <span className="font-bold text-black uppercase">Hubungi</span>
+            {settings?.phone || "08xx-xxxx-xxxx"}
+          </span>
+        </div>
+      </div>
 
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none"></div>
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
+      {/* 2. MAIN NAVIGATION */}
+      <nav className={`fixed w-full z-40 transition-all duration-300 ${isScrolled ? 'bg-white/95 backdrop-blur-md border-b border-black/5 py-3 shadow-sm' : 'bg-transparent py-6 md:top-10'}`}>
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            {settings?.logoUrl ? (
+              <img src={settings.logoUrl} alt="Logo" className="h-8 md:h-10 object-contain" />
+            ) : (
+              <div className="w-10 h-10 bg-black flex items-center justify-center font-display font-bold text-white">
+                {settings?.workshopName?.charAt(0) || "B"}
+              </div>
+            )}
+            <span className="font-display font-bold tracking-tighter text-xl hidden sm:block uppercase">
+              {settings?.workshopName || "DRIVE AUTO"}
+            </span>
+          </div>
 
-      {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 bg-black/40 backdrop-blur-2xl border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3"
-          >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
-              <Wrench className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">BENGKEL OS</span>
-          </motion.div>
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60"
-          >
-            {/* <a href="#" className="hover:text-white transition-colors">Fitur</a>
-            <a href="#" className="hover:text-white transition-colors">Harga</a>
-            <a href="#" className="hover:text-white transition-colors">Kontak</a> */}
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <Link to="/admin/login">
-              <button className="text-sm font-medium bg-white/10 border border-white/20 text-white px-5 py-2 rounded-full hover:bg-white/20 hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-md">
-                Masuk
-              </button>
+          <div className="hidden md:flex gap-8 items-center text-sm font-bold text-black/70 uppercase tracking-widest">
+            <a href="#layanan" className="hover:text-black transition-colors">Layanan</a>
+            <a href="#cara-booking" className="hover:text-black transition-colors">Proses</a>
+            <a href="#ulasan" className="hover:text-black transition-colors">Ulasan</a>
+            <a href="#lokasi" className="hover:text-black transition-colors">Lokasi</a>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Link to="/booking" className="hidden sm:flex bg-black text-white font-bold px-7 py-3 hover:bg-gray-800 transition-colors text-xs tracking-widest uppercase rounded-sm">
+              Booking Servis
             </Link>
-          </motion.div>
+            <button className="md:hidden text-black" onClick={() => setMobileMenuOpen(true)}>
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-6 pt-40 pb-20 relative z-10">
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col items-center text-center mb-24"
-        >
-          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-blue-300 text-xs font-semibold mb-8 uppercase tracking-widest shadow-[0_0_20px_rgba(37,99,235,0.15)]">
-            <Star className="w-3.5 h-3.5" />
-            <span>Versi 2.0 telah rilis</span>
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 bg-white z-50 flex flex-col p-6"
+          >
+            <div className="flex justify-between items-center mb-10 pt-2">
+              <span className="font-display font-bold text-xl uppercase tracking-tighter">{settings?.workshopName}</span>
+              <button onClick={() => setMobileMenuOpen(false)} className="text-black"><X className="w-8 h-8" /></button>
+            </div>
+            <div className="flex flex-col gap-6 text-2xl font-display font-bold uppercase tracking-tight">
+              <a href="#layanan" onClick={() => setMobileMenuOpen(false)} className="hover:text-gray-400 transition-colors">Layanan</a>
+              <a href="#cara-booking" onClick={() => setMobileMenuOpen(false)} className="hover:text-gray-400 transition-colors">Proses Booking</a>
+              <a href="#ulasan" onClick={() => setMobileMenuOpen(false)} className="hover:text-gray-400 transition-colors">Ulasan</a>
+              <a href="#lokasi" onClick={() => setMobileMenuOpen(false)} className="hover:text-gray-400 transition-colors">Lokasi</a>
+            </div>
+            <div className="mt-auto pb-8">
+              <Link to="/booking" className="flex items-center justify-center gap-2 py-4 bg-black text-white font-bold uppercase tracking-widest text-sm rounded-sm">
+                Booking Servis
+              </Link>
+            </div>
           </motion.div>
-          
-          <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter text-balance leading-[1.1] mb-6">
-            Kelola bengkel Anda <br className="hidden md:block" />
-            secara <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">profesional.</span>
+        )}
+      </AnimatePresence>
+
+      {/* 3. HERO SECTION */}
+      <section className="relative pt-28 md:pt-32 pb-16 flex flex-col lg:flex-row items-center min-h-[85vh] max-w-[1440px] mx-auto">
+        <div className="w-full lg:w-1/2 flex flex-col items-start px-6 md:px-12 z-10 py-8 lg:py-0">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 text-xs font-bold tracking-[0.2em] uppercase text-gray-500 mb-8">
+            <span className="w-6 h-[1px] bg-gray-500"></span>
+            Servis Otomotif Premium
+          </motion.div>
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="font-display text-[48px] leading-[1.05] md:text-[72px] lg:text-[84px] font-bold text-black mb-8 uppercase tracking-tighter">
+            Servis<br/>Mobil.<br/><span className="text-gray-300">Tanpa<br/>Ribet.</span>
           </motion.h1>
-          
-          <motion.p variants={itemVariants} className="text-lg md:text-xl text-white/50 max-w-2xl text-balance mb-12 font-medium">
-            Platform terpadu untuk bengkel otomotif modern. Kelola booking, teknisi, dan pantau perkembangan bisnis Anda dengan sentuhan elegan.
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-gray-500 text-lg max-w-md mb-10 leading-relaxed font-medium">
+            Booking lebih cepat, jelaskan masalah kendaraan, pilih jadwal, dan biarkan tim kami menyiapkan servis terbaik.
           </motion.p>
-          
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
-            <Link to="/booking" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto px-8 py-4 bg-white text-black font-semibold rounded-full hover:scale-105 transition-transform duration-300 flex items-center justify-center gap-2 shadow-[0_0_40px_rgba(255,255,255,0.3)] group">
-                Booking Servis <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </Link>
-            <Link to="/admin" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white font-semibold rounded-full border border-white/10 hover:bg-white/10 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 backdrop-blur-md">
-                <ShieldCheck className="w-5 h-5" /> Portal Pemilik
-              </button>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <Link to="/booking" className="bg-black text-white px-8 py-4 font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-3 group text-sm uppercase tracking-widest rounded-sm">
+              Booking Sekarang <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
-        </motion.div>
+        </div>
 
-        {/* Glossy Bento Grid */}
-        <motion.div 
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8, type: "spring", stiffness: 80 }}
-          className="grid md:grid-cols-5 gap-6 max-w-5xl mx-auto"
-        >
-          {/* Card 1 - Customer Portal */}
-          <Link to="/booking" className="md:col-span-3 group outline-none">
-            <div className="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-10 h-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:bg-white/10 hover:border-blue-500/50 hover:shadow-[0_0_40px_rgba(37,99,235,0.2)] transition-all duration-500 overflow-hidden relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              {/* Glossy Reflection */}
-              <div className="absolute -inset-full bg-gradient-to-tr from-transparent via-white/5 to-transparent group-hover:translate-x-full transition-transform duration-1000 rotate-45 pointer-events-none"></div>
+        {/* Sharp Image Block */}
+        <div className="w-full lg:w-1/2 h-[400px] lg:h-[85vh] px-6 lg:px-0 lg:pr-12 pb-8 lg:pb-0 mt-8 lg:mt-0">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.6 }}
+            className="w-full h-full bg-[url('/background.jpg')] bg-cover bg-center grayscale-[20%] contrast-125 rounded-sm"
+          ></motion.div>
+        </div>
+      </section>
 
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="w-14 h-14 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center mb-8 border border-blue-500/30 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-                  <User className="w-7 h-7" />
+      {/* 4. TRUST STRIP */}
+      <div className="border-y border-black/5 bg-white py-8">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex flex-wrap md:flex-nowrap justify-between gap-8 overflow-x-auto hide-scrollbar">
+          {[
+            { label: "Teknisi Ahli", sub: "Tersertifikasi" },
+            { label: "Diagnosa Transparan", sub: "Jujur & Jelas" },
+            { label: "Suku Cadang Asli", sub: "Bergaransi" },
+            { label: "Booking Mudah", sub: "Cepat & Tepat" },
+          ].map((item, i) => (
+            <div key={i} className="flex flex-col gap-1 shrink-0">
+              <span className="font-bold text-sm text-black uppercase tracking-widest">{item.label}</span>
+              <span className="text-xs text-gray-500 uppercase tracking-widest">{item.sub}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 7. SERVICE CATEGORIES */}
+      <section id="layanan" className="py-20 md:py-28 bg-white">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+            <div>
+              <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter mb-4 max-w-2xl text-black leading-tight">Layanan Kami.</h2>
+            </div>
+            <Link to="/booking" className="shrink-0 text-xs font-bold uppercase tracking-[0.2em] text-black hover:text-gray-500 transition-colors flex items-center gap-2 pb-1 border-b-2 border-black">
+              Lihat Semua <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+            {[
+              { id: '01', name: "Ganti Oli & Filter", img: "/images/service_oli.png", desc: "Perawatan rutin untuk mesin optimal." },
+              { id: '02', name: "Rem & Kaki-kaki", img: "/images/service_rem.png", desc: "Keamanan maksimal perjalanan Anda." },
+              { id: '03', name: "Aki & Kelistrikan", img: "/images/service_aki.png", desc: "Diagnosa presisi sistem kelistrikan." },
+              { id: '04', name: "Servis AC Mobil", img: "/images/service_ac.png", desc: "Kabin sejuk sirkulasi udara bersih." },
+            ].map((srv, i) => (
+              <div key={i} className="group flex flex-col cursor-pointer">
+                <div className="h-[280px] overflow-hidden mb-5 bg-gray-50 rounded-sm">
+                  <img src={srv.img} alt={srv.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 ease-out transform group-hover:scale-105" />
                 </div>
-                <h3 className="text-3xl font-bold text-white mb-3">Portal Pelanggan</h3>
-                <p className="text-white/60 mb-10 max-w-md text-lg leading-relaxed">
-                  Booking servis kendaraan Anda secara online. Pantau status pengerjaan secara real-time dengan notifikasi otomatis.
-                </p>
-                <div className="mt-auto flex items-center font-bold text-blue-400 group-hover:text-blue-300">
-                  Masuk Sekarang 
-                  <div className="ml-3 w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/40 transition-colors">
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                  </div>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-lg font-bold uppercase tracking-tight text-black">{srv.name}</h3>
+                  <span className="text-xs font-bold text-gray-400">{srv.id}</span>
+                </div>
+                <p className="text-gray-500 text-sm font-medium leading-relaxed">{srv.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 8. HOW IT WORKS */}
+      <section id="cara-booking" className="py-20 md:py-28 bg-[#FAFAFA] border-y border-black/5">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12">
+          <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter mb-20 text-black">Proses Booking.</h2>
+          <div className="grid md:grid-cols-4 gap-12 md:gap-6">
+            {[
+              { num: "01", title: "Pilih Layanan", desc: "Tentukan jenis servis kendaraan Anda." },
+              { num: "02", title: "Atur Jadwal", desc: "Pilih tanggal dan jam operasional." },
+              { num: "03", title: "Konfirmasi", desc: "Admin bengkel menghubungi via WA." },
+              { num: "04", title: "Servis", desc: "Datang tanpa perlu antre lama." },
+            ].map((step, i) => (
+              <div key={i} className="flex flex-col border-t border-black/10 pt-6">
+                <div className="font-display text-3xl font-bold text-black mb-8">
+                  {step.num}
+                </div>
+                <h3 className="text-base font-bold mb-3 text-black uppercase tracking-widest">{step.title}</h3>
+                <p className="text-gray-500 text-sm font-medium leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 9. WHY CHOOSE US */}
+      <section className="py-20 md:py-28 bg-white">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex flex-col lg:flex-row gap-16 lg:gap-24 items-center">
+          <div className="lg:w-1/2 flex flex-col justify-center">
+            <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter leading-[1.1] mb-8 text-black">Perawatan <br/>Transparan.</h2>
+            <p className="text-lg text-gray-500 font-medium mb-12 max-w-md leading-relaxed">Kami tidak melakukan pekerjaan tambahan tanpa persetujuan Anda. Kejujuran adalah standar utama kami.</p>
+            
+            <div className="grid sm:grid-cols-2 gap-y-6 gap-x-8">
+              {[
+                "Diagnosa Akurat", "Suku Cadang Asli", 
+                "Teknisi Handal", "Garansi Layanan", 
+                "Estimasi Jelas", "Komunikasi Cepat"
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 pb-3 border-b border-black/5">
+                  <Check className="w-4 h-4 text-black" />
+                  <span className="text-black font-bold uppercase tracking-wider text-xs">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="lg:w-1/2 w-full h-[400px] lg:h-[600px] bg-gray-50 rounded-sm overflow-hidden">
+            <img src="/images/mechanic_hero.png" alt="Mechanic" className="w-full h-full object-cover grayscale contrast-125" />
+          </div>
+        </div>
+      </section>
+
+      {/* 11. TESTIMONIALS */}
+      <section id="ulasan" className="py-20 md:py-28 bg-[#FAFAFA] border-y border-black/5">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12">
+          <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter mb-16 text-black">Ulasan Pelanggan.</h2>
+          <div className="grid md:grid-cols-3 gap-12">
+            {[1,2,3].map((_, i) => (
+              <div key={i} className="flex flex-col border-l-2 border-black pl-6 py-1">
+                <div className="flex gap-1 mb-6">
+                  {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-black text-black" />)}
+                </div>
+                <p className="text-black font-medium text-base leading-relaxed mb-8">"Pelayanan cepat, transparan, dan memuaskan. Estimasi harga di awal jadi tidak ada biaya kejutan. Sangat profesional."</p>
+                <div>
+                  <p className="font-bold text-black uppercase tracking-widest text-xs mb-1">Budi Santoso</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-widest">Toyota Fortuner</p>
                 </div>
               </div>
-            </div>
-          </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          {/* Card 2 - Admin Portal */}
-          <Link to="/admin" className="md:col-span-2 group outline-none">
-            <div className="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-10 h-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:bg-white/10 hover:border-purple-500/50 hover:shadow-[0_0_40px_rgba(168,85,247,0.2)] transition-all duration-500 overflow-hidden relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              {/* Glossy Reflection */}
-              <div className="absolute -inset-full bg-gradient-to-tr from-transparent via-white/5 to-transparent group-hover:translate-x-full transition-transform duration-1000 rotate-45 pointer-events-none"></div>
-
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="w-14 h-14 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center mb-8 border border-purple-500/30 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                  <Zap className="w-7 h-7" />
-                </div>
-                <h3 className="text-3xl font-bold text-white mb-3">Workspace</h3>
-                <p className="text-white/60 mb-10 text-lg leading-relaxed">
-                  Dashboard admin canggih untuk mengelola seluruh operasi bengkel.
-                </p>
-                <div className="mt-auto flex items-center font-bold text-purple-400 group-hover:text-purple-300">
-                  Buka Dashboard
-                  <div className="ml-3 w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/40 transition-colors">
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </div>
+      {/* 13. FAQ */}
+      <section className="py-20 md:py-28 bg-white">
+        <div className="max-w-[800px] mx-auto px-6 md:px-12">
+          <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter mb-16 text-center text-black">FAQ.</h2>
+          <div className="space-y-2">
+            {faqs.map((faq, i) => (
+              <div key={i} className="border-b border-black/10">
+                <button 
+                  className="w-full text-left py-6 flex justify-between items-center font-bold text-base lg:text-lg hover:text-gray-500 transition-colors text-black uppercase tracking-tight"
+                  onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+                >
+                  {faq.q}
+                  <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${activeFaq === i ? 'rotate-180' : ''}`} />
+                </button>
+                <AnimatePresence>
+                  {activeFaq === i && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pb-6 text-gray-500 leading-relaxed font-medium text-base max-w-2xl">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 15. FINAL CTA */}
+      <section className="py-28 md:py-36 bg-black text-white px-6">
+        <div className="max-w-[1440px] mx-auto flex flex-col items-center text-center">
+          <h2 className="font-display text-4xl md:text-6xl font-bold uppercase tracking-tighter mb-8 leading-[1.1] max-w-4xl">
+            Jangan Tunggu<br/>Masalah Membesar.
+          </h2>
+          <p className="text-gray-400 text-lg md:text-xl mb-12 font-medium max-w-xl">Booking pemeriksaan kendaraan sekarang. Mudah, cepat, dan transparan.</p>
+          <Link to="/booking" className="bg-white text-black px-10 py-5 font-bold hover:bg-gray-200 transition-colors flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] rounded-sm">
+            Booking Sekarang <ArrowRight className="w-4 h-4" />
           </Link>
-        </motion.div>
-      </main>
+        </div>
+      </section>
+
+      {/* 16. FOOTER */}
+      <footer className="bg-white pt-20 pb-24 md:pb-10 text-black border-t border-black/5">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+          <div className="md:col-span-2">
+            <span className="font-display font-bold text-2xl uppercase tracking-tighter mb-6 block">{settings?.workshopName || "DRIVE AUTO"}</span>
+            <p className="mb-6 font-medium leading-relaxed max-w-sm text-gray-500 text-sm">Perawatan kendaraan transparan, cepat, dan terpercaya untuk kenyamanan berkendara Anda.</p>
+          </div>
+          <div>
+            <h4 className="font-bold text-black mb-6 uppercase tracking-[0.2em] text-xs">Navigasi</h4>
+            <ul className="space-y-4 font-medium text-sm text-gray-500">
+              <li><a href="#layanan" className="hover:text-black transition-colors uppercase tracking-wider">Layanan Kami</a></li>
+              <li><a href="#cara-booking" className="hover:text-black transition-colors uppercase tracking-wider">Proses Booking</a></li>
+              <li><a href="#ulasan" className="hover:text-black transition-colors uppercase tracking-wider">Ulasan</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-black mb-6 uppercase tracking-[0.2em] text-xs">Informasi</h4>
+            <ul className="space-y-4 font-medium text-sm text-gray-500">
+              <li><Link to="/admin/login" className="hover:text-black transition-colors uppercase tracking-wider">Portal Admin</Link></li>
+              <li><a href="#" className="hover:text-black transition-colors uppercase tracking-wider">Syarat Ketentuan</a></li>
+              <li><a href="#" className="hover:text-black transition-colors uppercase tracking-wider">Privasi</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 border-t border-black/5">
+          <p>&copy; {new Date().getFullYear()} {settings?.workshopName}.</p>
+          <p>All Rights Reserved.</p>
+        </div>
+      </footer>
+
+      {/* 17. MOBILE BOTTOM ACTION BAR */}
+      <div className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-black/10 p-4 z-50 safe-area-pb">
+        <Link to="/booking" className="w-full bg-black text-white font-bold flex items-center justify-center py-4 text-xs uppercase tracking-widest rounded-sm">
+          Booking Servis
+        </Link>
+      </div>
+
     </div>
   );
 }

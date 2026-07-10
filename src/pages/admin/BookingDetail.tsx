@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { StatusBadge } from "../../components/ui/core";
-import { ArrowLeft, MessageCircle, Clock, User, Wrench, FileText, ChevronRight } from "lucide-react";
+import { ArrowLeft, MessageCircle, Clock, User, Wrench, FileText, ChevronRight, Image, Printer } from "lucide-react";
 import { createWhatsAppLink } from "../../lib/utils";
 import { WhatsAppHelper } from "../../utils/whatsapp";
 import { motion } from "motion/react";
-import { getBookingById, getTechnicians, updateBookingStatus, updateBookingTechnician } from "../../lib/mockApi";
+import { getBookingById, getTechnicians, updateBookingStatus, updateBookingTechnician, getSettings } from "../../lib/mockApi";
 
 const statuses = [
   "Baru", "Menunggu Konfirmasi", "Terkonfirmasi", "Datang", 
@@ -43,6 +43,7 @@ export default function BookingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [booking, setBooking] = useState<any>(null);
+  const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [technicians, setTechnicians] = useState<any[]>([]);
 
@@ -54,6 +55,7 @@ export default function BookingDetail() {
   const loadBooking = () => {
     setLoading(true);
     setBooking(id ? getBookingById(id) : null);
+    setSettings(getSettings());
     setLoading(false);
   };
 
@@ -105,7 +107,8 @@ export default function BookingDetail() {
   if (!booking || booking.error) return <div className="text-red-500 p-8 text-center bg-red-50 rounded-2xl">Booking tidak ditemukan</div>;
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-10">
+    <>
+    <div className="space-y-8 max-w-5xl mx-auto pb-10 print:hidden">
       
       {/* Header */}
       <div className="flex items-center gap-4 border-b border-slate-200 pb-6">
@@ -203,6 +206,31 @@ export default function BookingDetail() {
             </select>
           </motion.div>
 
+          {/* Payment Proof */}
+          {booking.paymentProofBase64 && (
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.05 }}
+              className="bg-white rounded-3xl border border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.02)] overflow-hidden"
+            >
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center bg-slate-50/50">
+                <div className="p-2 bg-amber-50 text-amber-600 rounded-lg mr-3">
+                  <Image className="w-5 h-5" />
+                </div>
+                <h2 className="text-lg font-bold text-slate-900">Bukti Pembayaran</h2>
+              </div>
+              <div className="p-6">
+                <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm group relative cursor-pointer" onClick={() => window.open(booking.paymentProofBase64, '_blank')}>
+                  <img src={booking.paymentProofBase64} alt="Bukti Pembayaran" className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                    <span className="text-white font-bold text-sm bg-black/50 px-4 py-2 rounded-full backdrop-blur-sm">Lihat Penuh</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Customer */}
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
@@ -224,7 +252,14 @@ export default function BookingDetail() {
               
               <div className="space-y-2">
                 <button 
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-medium text-sm group"
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors font-bold text-sm group border border-blue-200 shadow-sm"
+                  onClick={() => window.print()}
+                >
+                  <span className="flex items-center gap-2"><Printer className="w-4 h-4" /> Cetak Invoice (PDF)</span>
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+                <button 
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-medium text-sm group mt-4"
                   onClick={() => handleWA("chat")}
                 >
                   <span className="flex items-center gap-2"><MessageCircle className="w-4 h-4" /> Buka WhatsApp</span>
@@ -288,9 +323,109 @@ export default function BookingDetail() {
               </select>
             </div>
           </motion.div>
-
         </div>
       </div>
     </div>
+
+    {/* Invoice Print Layout */}
+    <div className="hidden print:block max-w-4xl mx-auto bg-white min-h-screen">
+      {/* Invoice Header */}
+      <div className="flex items-start justify-between border-b-4 border-double border-gray-800 pb-6 mb-8">
+        <div className="flex items-center gap-6">
+          {settings?.logoUrl && settings.logoUrl.trim() !== '' && (
+            <img 
+              src={settings.logoUrl} 
+              alt="Logo" 
+              className="max-h-24 w-auto object-contain rounded-lg" 
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight uppercase">
+              {settings?.workshopName || "BENGKEL OS CZ-BARRATEC"}
+            </h1>
+            <p className="text-gray-600 font-medium mt-1 text-lg">Layanan Servis Profesional</p>
+            <div className="text-sm text-gray-500 mt-2 flex flex-col gap-0.5">
+              <p>{settings?.address}</p>
+              <p>Telp/WA: {settings?.phone}</p>
+            </div>
+          </div>
+        </div>
+        <div className="text-right">
+          <h2 className="text-4xl font-black text-gray-200 tracking-widest uppercase mb-4">Invoice</h2>
+          <div className="text-sm text-gray-600">
+            <p className="font-bold text-gray-900 mb-1">No. Invoice:</p>
+            <p className="font-mono bg-gray-100 px-3 py-1 rounded-md inline-block">{booking.bookingCode}</p>
+            <p className="mt-3 font-bold text-gray-900 mb-1">Tanggal Transaksi:</p>
+            <p>{booking.bookingDate} {booking.bookingTime}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Customer Info */}
+      <div className="mb-8 grid grid-cols-2 gap-8">
+        <div>
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b border-gray-200 pb-1">Tagihan Kepada</h3>
+          <p className="text-lg font-bold text-gray-900">{booking.customerName}</p>
+          <p className="text-gray-600 mt-1">{booking.customerPhone}</p>
+        </div>
+        <div>
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b border-gray-200 pb-1">Informasi Kendaraan</h3>
+          <p className="text-lg font-bold text-gray-900">{booking.carType}</p>
+          <p className="text-gray-600 font-mono mt-1">{booking.plateNumber || "-"}</p>
+        </div>
+      </div>
+
+      {/* Invoice Table */}
+      <table className="w-full text-left border-collapse mb-12">
+        <thead className="bg-gray-100 text-gray-900 border-y-2 border-gray-800">
+          <tr>
+            <th className="py-3 px-4 w-12 text-center">NO</th>
+            <th className="py-3 px-4">DESKRIPSI LAYANAN / KELUHAN</th>
+            <th className="py-3 px-4 text-right">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          <tr>
+            <td className="py-4 px-4 text-center font-medium">1</td>
+            <td className="py-4 px-4">
+              <p className="font-bold text-gray-900 text-base">{booking.serviceType}</p>
+              <p className="text-sm text-gray-500 mt-1 max-w-lg">{booking.problemDescription}</p>
+            </td>
+            <td className="py-4 px-4 text-right font-medium text-gray-900">
+              {booking.estimatedPrice ? `Rp ${booking.estimatedPrice.toLocaleString('id-ID')}` : '-'}
+            </td>
+          </tr>
+        </tbody>
+        <tfoot className="border-t-2 border-gray-800">
+          <tr>
+            <td colSpan={2} className="py-4 px-4 text-right font-bold text-gray-900 uppercase">Total Tagihan</td>
+            <td className="py-4 px-4 text-right font-bold text-xl text-gray-900 bg-gray-50">
+              {booking.estimatedPrice ? `Rp ${booking.estimatedPrice.toLocaleString('id-ID')}` : '-'}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+
+      {/* Signatures */}
+      <div className="mt-20 flex justify-between px-10">
+        <div className="text-center">
+          <p className="text-gray-900 mb-20">Pelanggan,</p>
+          <div className="w-48 border-b border-gray-800 mx-auto"></div>
+          <p className="text-gray-900 mt-2 font-bold">{booking.customerName}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-gray-900 mb-20">Hormat Kami,</p>
+          <div className="w-48 border-b border-gray-800 mx-auto"></div>
+          <p className="text-gray-900 mt-2 font-bold">{settings?.ownerName || "Kasir / Bengkel"}</p>
+        </div>
+      </div>
+      
+      {/* Footer Note */}
+      <div className="mt-16 text-center text-xs text-gray-400 border-t border-gray-100 pt-4">
+        Terima kasih atas kepercayaan Anda menggunakan layanan kami.
+      </div>
+    </div>
+    </>
   );
 }

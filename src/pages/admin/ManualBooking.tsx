@@ -3,22 +3,30 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, Input, Label, Select, Textarea, Button } from "../../components/ui/core";
 import { ArrowLeft } from "lucide-react";
-import { createBooking, getActiveServices } from "../../lib/mockApi";
+import { createBooking, getActiveServices, getSettings, getActivePromos } from "../../lib/mockApi";
 
 export default function ManualBooking() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState<any[]>([]);
+  const [promos, setPromos] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     setServices(getActiveServices());
+    setPromos(getActivePromos());
+    setSettings(getSettings());
   }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const fd = new FormData(e.currentTarget);
-    const data = Object.fromEntries(fd.entries());
+    const data = Object.fromEntries(fd.entries()) as any;
+
+    if (data.problemCategory) {
+      data.problemDescription = `${data.problemCategory}${data.problemDescription ? ' - ' + data.problemDescription : ''}`;
+    }
 
     const { id } = createBooking(data);
     setLoading(false);
@@ -84,7 +92,12 @@ export default function ManualBooking() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-100 pt-6">
               <div className="space-y-2">
                 <Label htmlFor="carType">Tipe Mobil *</Label>
-                <Input id="carType" name="carType" required />
+                <Select id="carType" name="carType" required defaultValue="">
+                  <option value="" disabled>Pilih tipe mobil</option>
+                  {settings?.carTypes?.map((ct: string, i: number) => (
+                    <option key={i} value={ct}>{ct}</option>
+                  ))}
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="plateNumber">Plat Nomor</Label>
@@ -94,16 +107,36 @@ export default function ManualBooking() {
                 <Label htmlFor="serviceType">Jenis Layanan *</Label>
                 <Select id="serviceType" name="serviceType" required defaultValue="">
                   <option value="" disabled>Pilih layanan</option>
-                  {services.map(s => (
-                    <option key={s.id} value={s.name}>{s.name}</option>
-                  ))}
+                  {promos.length > 0 && (
+                    <optgroup label="Promo Spesial">
+                      {promos.map(p => (
+                        <option key={p.id} value={`[PROMO] ${p.name}`}>[PROMO] {p.name}</option>
+                      ))}
+                    </optgroup>
+                  )}
+                  <optgroup label="Layanan Reguler">
+                    {services.map(s => (
+                      <option key={s.id} value={s.name}>{s.name}</option>
+                    ))}
+                  </optgroup>
                 </Select>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="problemDescription">Keluhan / Problem *</Label>
-              <Textarea id="problemDescription" name="problemDescription" required />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="problemCategory">Kategori Keluhan / Problem *</Label>
+                <Select id="problemCategory" name="problemCategory" required defaultValue="">
+                  <option value="" disabled>Pilih kategori keluhan</option>
+                  {settings?.problemOptions?.map((po: string, i: number) => (
+                    <option key={i} value={po}>{po}</option>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="problemDescription">Detail Keluhan Tambahan</Label>
+                <Textarea id="problemDescription" name="problemDescription" placeholder="Opsional" />
+              </div>
             </div>
 
             <div className="space-y-2">

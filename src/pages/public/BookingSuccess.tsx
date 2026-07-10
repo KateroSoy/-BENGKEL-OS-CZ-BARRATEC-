@@ -1,66 +1,109 @@
-import { Link } from "react-router-dom";
-import { CheckCircle2, ArrowLeft, CalendarCheck } from "lucide-react";
-import { motion } from "motion/react";
+import { Link, useLocation } from "react-router-dom";
+import { CheckCircle2, MapPin, MessageCircle, Download, RotateCcw, Calendar, User, Wrench, Clock, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getSettings } from "../../lib/mockApi";
 
 export default function BookingSuccess() {
+  const location = useLocation();
+  const booking = location.state?.booking;
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    setSettings(getSettings());
+  }, []);
+
+  const bookingCode = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const waMessage = `Halo Admin, saya ${booking?.customerName || 'Pelanggan'}. Saya sudah membuat booking dengan kode ${bookingCode} untuk kendaraan ${booking?.carBrand || ''} ${booking?.carModel || ''} pada ${booking?.bookingDate || ''} jam ${booking?.bookingTime || ''}. Mohon konfirmasinya.`;
+  const waLink = settings?.phone ? `https://wa.me/${settings.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMessage)}` : '#';
+
+  const handleSave = () => {
+    window.print();
+  };
+
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center py-12 px-4 sm:px-6 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-primary)] font-sans py-12 px-5 md:px-12 relative overflow-hidden">
       
       {/* Background Decor */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-tr from-emerald-100/50 to-teal-100/30 blur-[100px] rounded-full -z-10 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--color-primary)]/10 blur-[120px] rounded-full -z-10 pointer-events-none"></div>
 
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, type: "spring", stiffness: 80 }}
-        className="max-w-lg w-full"
-      >
-        <div className="bg-white/80 backdrop-blur-xl border border-slate-200/60 p-10 sm:p-12 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.04)] text-center relative overflow-hidden">
+      <div className="max-w-2xl mx-auto z-10 relative">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border-subtle)] rounded shadow-2xl p-6 md:p-10 relative overflow-hidden">
           
-          {/* Top Edge Decoration */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
-
-          <motion.div 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 150 }}
-            className="mx-auto flex items-center justify-center h-28 w-28 rounded-full bg-emerald-50 mb-8 relative"
-          >
-            <div className="absolute inset-0 rounded-full border-4 border-emerald-100 animate-[spin_3s_linear_infinite] border-t-emerald-300"></div>
-            <CheckCircle2 className="h-14 w-14 text-emerald-500 relative z-10" />
-          </motion.div>
-          
-          <div className="space-y-4 mb-10">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Booking Berhasil!</h2>
-            <p className="text-slate-500 text-lg leading-relaxed text-balance">
-              Luar biasa! Jadwal perawatan kendaraan Anda telah masuk ke sistem kami. 
-            </p>
+          <div className="flex flex-col items-center text-center mb-10 border-b border-[var(--color-border-subtle)] pb-10">
+            <div className="w-20 h-20 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center mb-6 border border-[var(--color-success)]/30">
+              <CheckCircle2 className="w-10 h-10 text-[var(--color-success)]" />
+            </div>
+            <h1 className="font-display text-3xl font-bold uppercase mb-2">Booking Berhasil Dikirim</h1>
+            <p className="text-[var(--color-text-secondary)]">Kode Booking: <strong className="text-white text-lg ml-2 tracking-widest">{bookingCode}</strong></p>
+            
+            <div className="mt-6 flex items-center gap-2 bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-4 py-2 rounded text-sm font-bold border border-[var(--color-warning)]/20">
+              <Clock className="w-4 h-4" />
+              Status: Menunggu Konfirmasi (Estimasi 15 menit)
+            </div>
           </div>
 
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 mb-10 text-left flex items-start gap-4">
-             <CalendarCheck className="w-8 h-8 text-blue-500 shrink-0 mt-0.5" />
-             <div>
-                <h4 className="font-bold text-slate-900">Langkah Selanjutnya</h4>
-                <p className="text-sm text-slate-600 mt-1">
-                  Admin bengkel kami akan segera meninjau jadwal Anda dan mengirimkan pesan konfirmasi beserta detail estimasi melalui WhatsApp.
-                </p>
-             </div>
+          <div className="space-y-6 mb-10">
+            <h3 className="font-bold uppercase tracking-widest text-[var(--color-text-secondary)] text-sm mb-4">Detail Reservasi</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[var(--color-background)] p-6 rounded border border-[var(--color-border-subtle)]">
+              <div className="flex gap-3">
+                <User className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
+                <div>
+                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">Nama Pelanggan</p>
+                  <p className="font-bold">{booking?.customerName || "-"}</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <Wrench className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
+                <div>
+                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">Kendaraan & Layanan</p>
+                  <p className="font-bold">{booking?.carBrand} {booking?.carModel}</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">{booking?.serviceType || "-"}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Calendar className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
+                <div>
+                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">Jadwal Kedatangan</p>
+                  <p className="font-bold">{booking?.bookingDate || "-"}</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">Jam: {booking?.bookingTime || "-"}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <MapPin className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
+                <div>
+                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">Lokasi Bengkel</p>
+                  <p className="font-bold">{settings?.workshopName || "Bengkel"}</p>
+                  <p className="text-sm text-[var(--color-text-secondary)] line-clamp-1">{settings?.address || "-"}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <Link to="/">
-            <button className="w-full bg-white text-slate-900 border-2 border-slate-200 font-bold py-4 px-6 rounded-2xl hover:bg-slate-50 hover:border-slate-300 focus:ring-4 focus:ring-slate-100 transition-all flex items-center justify-center gap-3 group shadow-sm">
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              Kembali ke Beranda
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <a href={waLink} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 bg-[#25D366] text-black font-bold py-3 px-4 rounded hover:bg-[#20b858] transition-colors">
+              <MessageCircle className="w-5 h-5" /> Konfirmasi via WhatsApp
+            </a>
+            <button onClick={handleSave} className="flex items-center justify-center gap-2 bg-[var(--color-background)] border border-[var(--color-border-subtle)] text-white font-bold py-3 px-4 rounded hover:bg-white/5 transition-colors">
+              <Download className="w-5 h-5" /> Simpan Detail Booking
             </button>
-          </Link>
-        </div>
+            <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 bg-[var(--color-background)] border border-[var(--color-border-subtle)] text-white font-bold py-3 px-4 rounded hover:bg-white/5 transition-colors">
+              <MapPin className="w-5 h-5" /> Lihat Lokasi
+            </a>
+            <Link to="/booking" className="flex items-center justify-center gap-2 bg-[var(--color-background)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] font-bold py-3 px-4 rounded hover:bg-white/5 transition-colors">
+              <RotateCcw className="w-5 h-5" /> Buat Booking Baru
+            </Link>
+          </div>
 
-        <div className="mt-8 text-center">
-          <Link to="/admin/login" className="text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors">
-            Portal Karyawan
-          </Link>
+          <div className="mt-8 text-center print:hidden">
+            <Link to="/" className="text-sm text-[var(--color-primary)] hover:underline">Kembali ke Beranda</Link>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

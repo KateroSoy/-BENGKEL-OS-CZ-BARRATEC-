@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { format, subDays } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Select } from "../../components/ui/core";
-import { Printer, TrendingUp, Activity, Wrench, CheckCircle } from "lucide-react";
+import { Printer, TrendingUp, Activity, Wrench, CheckCircle, Search, ChevronLeft, ChevronRight, XCircle } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
-import { getReports } from "../../lib/mockApi";
+import { getReports, getSettings } from "../../lib/mockApi";
 
 // Mock Data
 const generateMockTrend = () => {
@@ -31,6 +31,7 @@ const MOCK_SERVICE_DATA = [
 
 export default function Reports() {
   const [bookings, setBookings] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
   // Filters
@@ -38,15 +39,23 @@ export default function Reports() {
   const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [statusFilter, setStatusFilter] = useState("");
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [serviceFilter, setServiceFilter] = useState("");
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const [mockTrend] = useState(generateMockTrend());
 
   useEffect(() => {
     loadReports();
-  }, [startDate, endDate, statusFilter]);
+  }, [startDate, endDate]);
 
   const loadReports = () => {
     setLoading(true);
-    setBookings(getReports({ start: startDate, end: endDate, status: statusFilter || undefined }));
+    setSettings(getSettings());
+    // Fetch all for the date range so cards have accurate totals
+    setBookings(getReports({ start: startDate, end: endDate }));
     setLoading(false);
   };
 
@@ -54,8 +63,49 @@ export default function Reports() {
     window.print();
   };
 
+  // Compute Totals for Cards (based on raw date-range data)
   const totalRevenue = bookings.reduce((sum, b) => sum + (b.estimatedPrice || 0), 0);
   const completedCount = bookings.filter(b => b.status === 'Selesai').length;
+  const cancelledCount = bookings.filter(b => b.status === 'Batal').length;
+
+  // Local Filtering for Table
+  const filteredBookings = bookings.filter(b => {
+    const matchStatus = statusFilter ? b.status === statusFilter : true;
+    const matchService = serviceFilter ? b.serviceType === serviceFilter : true;
+    const searchLower = searchQuery.toLowerCase();
+    const matchSearch = 
+      (b.customerName || '').toLowerCase().includes(searchLower) ||
+      (b.bookingCode || '').toLowerCase().includes(searchLower) ||
+      (b.plateNumber || '').toLowerCase().includes(searchLower);
+    return matchStatus && matchService && matchSearch;
+  });
+
+  const filteredTotalRevenue = filteredBookings.reduce((sum, b) => sum + (b.estimatedPrice || 0), 0);
+  const uniqueServices = Array.from(new Set(bookings.map(b => b.serviceType))).filter(Boolean);
+
+  // Sorting Logic
+  let sortedBookings = [...filteredBookings];
+  if (sortOrder === "newest") {
+    sortedBookings.sort((a, b) => new Date(`${b.bookingDate}T${b.bookingTime}`).getTime() - new Date(`${a.bookingDate}T${a.bookingTime}`).getTime());
+  } else if (sortOrder === "oldest") {
+    sortedBookings.sort((a, b) => new Date(`${a.bookingDate}T${a.bookingTime}`).getTime() - new Date(`${b.bookingDate}T${b.bookingTime}`).getTime());
+  } else if (sortOrder === "price_desc") {
+    sortedBookings.sort((a, b) => (b.estimatedPrice || 0) - (a.estimatedPrice || 0));
+  } else if (sortOrder === "price_asc") {
+    sortedBookings.sort((a, b) => (a.estimatedPrice || 0) - (b.estimatedPrice || 0));
+  }
+
+  // Pagination Logic
+  const totalPages = Math.ceil(sortedBookings.length / itemsPerPage) || 1;
+  const paginatedBookings = sortedBookings.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleCardClick = (status: string) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-10 print:max-w-none print:pb-0 print:m-0 print:space-y-4">
@@ -71,45 +121,96 @@ export default function Reports() {
       </div>
 
       {/* Print Header */}
-      <div className="hidden print:block border-b border-gray-200 pb-4 mb-6">
-        <div className="flex justify-between items-end">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">BENGKEL OS CZ-BARRATEC</h1>
-            <p className="text-gray-500">Laporan Keuangan & Operasional</p>
+      <div className="hidden print:block mb-8">
+        <div className="flex items-center justify-between border-b-4 border-double border-gray-800 pb-6 mb-2">
+          <div className="flex items-center gap-6 print:gap-4">
+            {settings?.logoUrl && settings.logoUrl.trim() !== '' && (
+              <img 
+                src={settings.logoUrl} 
+                alt="Logo" 
+                className="max-h-20 w-auto print:max-h-16 object-contain rounded-lg" 
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            )}
+            <div>
+              <h1 className="text-2xl print:text-xl font-extrabold text-gray-900 tracking-tight uppercase">
+                {settings?.workshopName || "BENGKEL OS CZ-BARRATEC"}
+              </h1>
+              <p className="text-gray-600 font-medium mt-1 text-lg">Laporan Keuangan & Operasional</p>
+              <div className="text-sm text-gray-500 mt-2 flex flex-col gap-0.5">
+                <p>{settings?.address}</p>
+                <p>Telp/WA: {settings?.phone}</p>
+              </div>
+            </div>
           </div>
-          <div className="text-right text-sm text-gray-500">
-            <p>Periode: {format(new Date(startDate), "dd MMM yyyy")} - {format(new Date(endDate), "dd MMM yyyy")}</p>
-            <p>Dicetak pada: {format(new Date(), "dd MMM yyyy HH:mm")}</p>
+          <div className="text-right text-sm text-gray-500 self-end bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <p className="font-bold text-gray-700 mb-1">Periode Laporan:</p>
+            <p>{format(new Date(startDate), "dd MMM yyyy")} - {format(new Date(endDate), "dd MMM yyyy")}</p>
+            <p className="mt-2 text-xs">Dicetak: {format(new Date(), "dd MMM yyyy HH:mm")}</p>
           </div>
         </div>
       </div>
 
       {/* Filters */}
       <Card className="print:hidden">
-        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <CardContent className="pt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4">
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">Dari Tanggal</label>
-            <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+            <Input type="date" value={startDate} onChange={e => { setStartDate(e.target.value); setCurrentPage(1); }} />
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">Sampai Tanggal</label>
-            <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+            <Input type="date" value={endDate} onChange={e => { setEndDate(e.target.value); setCurrentPage(1); }} />
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">Status</label>
-            <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+            <Select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}>
               <option value="">Semua Status</option>
               <option value="Selesai">Selesai</option>
               <option value="Batal">Batal</option>
               <option value="Tidak Datang">Tidak Datang</option>
             </Select>
           </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Layanan</label>
+            <Select value={serviceFilter} onChange={e => { setServiceFilter(e.target.value); setCurrentPage(1); }}>
+              <option value="">Semua Layanan</option>
+              {uniqueServices.map((svc: any) => (
+                <option key={svc} value={svc}>{svc}</option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Urutkan</label>
+            <Select value={sortOrder} onChange={e => { setSortOrder(e.target.value); setCurrentPage(1); }}>
+              <option value="newest">Terbaru</option>
+              <option value="oldest">Terlama</option>
+              <option value="price_desc">Harga Tertinggi</option>
+              <option value="price_asc">Harga Terendah</option>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Pencarian</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input 
+                type="text" 
+                placeholder="Nama, Kode, Plat..." 
+                value={searchQuery}
+                onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                className="pl-9"
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 print:grid-cols-4 print:gap-2">
-        <Card className="print:shadow-none print:border-gray-300">
+        <Card 
+          className={`print:shadow-none print:border-gray-300 cursor-pointer transition-all hover:ring-2 hover:ring-blue-500 ${statusFilter === '' ? 'ring-2 ring-blue-500 bg-blue-50/10' : ''}`}
+          onClick={() => handleCardClick('')}
+        >
           <CardContent className="p-6 print:p-4">
             <div className="flex items-center gap-4">
               <div className="bg-blue-50 p-3 rounded-full print:hidden">
@@ -117,13 +218,16 @@ export default function Reports() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Total Booking</p>
-                <p className="text-2xl font-bold text-gray-900">{bookings.length || 156}</p>
+                <p className="text-2xl font-bold text-gray-900">{bookings.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="print:shadow-none print:border-gray-300">
+        <Card 
+          className={`print:shadow-none print:border-gray-300 cursor-pointer transition-all hover:ring-2 hover:ring-emerald-500 ${statusFilter === 'Selesai' ? 'ring-2 ring-emerald-500 bg-emerald-50/10' : ''}`}
+          onClick={() => handleCardClick('Selesai')}
+        >
           <CardContent className="p-6 print:p-4">
             <div className="flex items-center gap-4">
               <div className="bg-emerald-50 p-3 rounded-full print:hidden">
@@ -131,21 +235,24 @@ export default function Reports() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Booking Selesai</p>
-                <p className="text-2xl font-bold text-gray-900">{completedCount || 142}</p>
+                <p className="text-2xl font-bold text-gray-900">{completedCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="print:shadow-none print:border-gray-300">
+        <Card 
+          className={`print:shadow-none print:border-gray-300 cursor-pointer transition-all hover:ring-2 hover:ring-red-500 ${statusFilter === 'Batal' ? 'ring-2 ring-red-500 bg-red-50/10' : ''}`}
+          onClick={() => handleCardClick('Batal')}
+        >
           <CardContent className="p-6 print:p-4">
             <div className="flex items-center gap-4">
-              <div className="bg-amber-50 p-3 rounded-full print:hidden">
-                <Wrench className="h-6 w-6 text-amber-600" />
+              <div className="bg-red-50 p-3 rounded-full print:hidden">
+                <XCircle className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">Layanan Favorit</p>
-                <p className="text-xl font-bold text-gray-900 truncate max-w-[120px]">Ganti Oli</p>
+                <p className="text-sm font-medium text-gray-500">Booking Batal</p>
+                <p className="text-2xl font-bold text-gray-900">{cancelledCount}</p>
               </div>
             </div>
           </CardContent>
@@ -158,9 +265,9 @@ export default function Reports() {
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">Estimasi Revenue</p>
+                <p className="text-sm font-medium text-gray-500">Total Revenue</p>
                 <p className="text-xl font-bold text-gray-900 truncate">
-                  Rp {(totalRevenue || 24500000).toLocaleString('id-ID')}
+                  Rp {totalRevenue.toLocaleString('id-ID')}
                 </p>
               </div>
             </div>
@@ -169,8 +276,8 @@ export default function Reports() {
       </div>
 
       {/* Visual Data Demo */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:grid-cols-2 print:gap-4 print:page-break-inside-avoid">
-        <Card className="print:shadow-none print:border-gray-300">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:hidden">
+        <Card>
           <CardHeader className="print:pb-2">
             <CardTitle className="text-lg">Tren Booking (7 Hari Terakhir)</CardTitle>
           </CardHeader>
@@ -223,14 +330,16 @@ export default function Reports() {
       </div>
 
       {/* Table Data - forces page break before it in print if it's long */}
-      <div className="print:page-break-before-auto">
-        <h3 className="text-lg font-bold text-gray-900 mb-4 hidden print:block print:mt-8">Rincian Data Booking</h3>
+      <div className="print:page-break-before-auto print:mt-8">
+        <h3 className="text-lg font-bold text-gray-900 mb-4 hidden print:block border-b-2 border-gray-800 pb-2">Rincian Data Booking</h3>
         
         {loading ? (
           <div className="text-center py-12 text-gray-500 print:hidden">Memuat laporan...</div>
         ) : (
-          <Card className="print:shadow-none print:border-gray-300 print:border-t">
-            <div className="overflow-x-auto">
+          <>
+            {/* Screen View Table (Paginated) */}
+            <Card className="print:hidden">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm text-left print:text-[11px]">
                 <thead className="bg-gray-50 print:bg-white text-gray-600 print:text-gray-900 font-medium border-b border-gray-100 print:border-gray-300">
                   <tr>
@@ -244,12 +353,14 @@ export default function Reports() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 print:divide-gray-200">
-                  {bookings.length === 0 ? (
+                  {paginatedBookings.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-gray-500 print:py-4">Belum ada data laporan</td>
+                      <td colSpan={7} className="px-4 py-8 text-center text-gray-500 print:py-4">
+                        Belum ada data laporan / Tidak ada yang cocok dengan pencarian
+                      </td>
                     </tr>
                   ) : (
-                    bookings.map((b) => (
+                    paginatedBookings.map((b) => (
                       <tr key={b.id} className="hover:bg-gray-50 print:hover:bg-transparent print:break-inside-avoid">
                         <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap">{b.bookingDate} {b.bookingTime}</td>
                         <td className="px-4 py-3 print:px-2 print:py-2 font-medium text-gray-900">{b.bookingCode}</td>
@@ -270,9 +381,121 @@ export default function Reports() {
                     ))
                   )}
                 </tbody>
+                {filteredBookings.length > 0 && (
+                  <tfoot className="bg-blue-50/50 print:bg-gray-100 border-t-2 border-blue-100 print:border-gray-300 font-bold text-gray-900">
+                    <tr>
+                      <td colSpan={5} className="px-4 py-3 print:px-2 print:py-2 text-right">
+                        Total {filteredBookings.length} Data Tersaring
+                      </td>
+                      <td className="px-4 py-3 print:px-2 print:py-2 text-right">
+                        Total Estimasi Biaya
+                      </td>
+                      <td className="px-4 py-3 print:px-2 print:py-2 text-right text-blue-700 print:text-gray-900">
+                        Rp {filteredTotalRevenue.toLocaleString('id-ID')}
+                      </td>
+                    </tr>
+                  </tfoot>
+                )}
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {filteredBookings.length > 0 && (
+              <div className="px-4 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-sm text-gray-500">
+                  Menampilkan <span className="font-medium text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> hingga <span className="font-medium text-gray-900">{Math.min(currentPage * itemsPerPage, filteredBookings.length)}</span> dari <span className="font-medium text-gray-900">{filteredBookings.length}</span> data
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" /> Sebelumnya
+                  </Button>
+                  <div className="text-sm font-medium text-gray-700 px-2">
+                    Hal {currentPage} dari {totalPages}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Selanjutnya <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
+
+            {/* Print View Table (All Data) */}
+            <div className="hidden print:block w-full">
+              <table className="w-full text-xs text-left border-collapse" style={{ tableLayout: 'auto' }}>
+                <thead className="bg-gray-100 text-gray-900 font-bold border-y-2 border-gray-800">
+                  <tr>
+                    <th className="px-1 py-2 w-[15%]">TANGGAL</th>
+                    <th className="px-1 py-2 w-[15%]">KODE</th>
+                    <th className="px-1 py-2 w-[18%]">KONSUMEN</th>
+                    <th className="px-1 py-2 w-[18%]">KENDARAAN</th>
+                    <th className="px-1 py-2 w-[14%]">LAYANAN</th>
+                    <th className="px-1 py-2 w-[10%]">STATUS</th>
+                    <th className="px-1 py-2 w-[10%] text-right">BIAYA</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-300">
+                  {filteredBookings.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-1 py-4 text-center text-gray-500">Tidak ada data laporan</td>
+                    </tr>
+                  ) : (
+                    filteredBookings.map((b) => (
+                      <tr key={b.id} className="print:break-inside-avoid">
+                        <td className="px-1 py-2 whitespace-nowrap">{b.bookingDate} {b.bookingTime}</td>
+                        <td className="px-1 py-2 font-medium text-gray-900 break-words">{b.bookingCode}</td>
+                        <td className="px-1 py-2 break-words">
+                          {b.customerName}
+                          <div className="text-[10px] text-gray-500">{b.customerPhone}</div>
+                        </td>
+                        <td className="px-1 py-2 break-words">
+                          {b.carType}
+                          <div className="text-[10px] text-gray-500">{b.plateNumber}</div>
+                        </td>
+                        <td className="px-1 py-2 break-words">{b.serviceType}</td>
+                        <td className="px-1 py-2">{b.status}</td>
+                        <td className="px-1 py-2 text-right whitespace-nowrap">
+                          {b.estimatedPrice ? `Rp ${b.estimatedPrice.toLocaleString('id-ID')}` : '-'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+                {filteredBookings.length > 0 && (
+                  <tfoot className="border-t-2 border-gray-800 font-bold text-gray-900 bg-gray-50">
+                    <tr>
+                      <td colSpan={5} className="px-1 py-2 text-right">Total {filteredBookings.length} Data Tersaring</td>
+                      <td className="px-1 py-2 text-right">Total Estimasi</td>
+                      <td className="px-1 py-2 text-right whitespace-nowrap">Rp {filteredTotalRevenue.toLocaleString('id-ID')}</td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+              
+              {/* Signature Section */}
+              <div className="mt-16 flex justify-end">
+                <div className="text-center">
+                  <p className="text-gray-900 mb-16">
+                    {settings?.address?.split(',')[0] || "Jakarta"}, {format(new Date(), "dd MMMM yyyy")}
+                    <br />
+                    Mengetahui,
+                  </p>
+                  <div className="w-48 border-b border-gray-800 mx-auto"></div>
+                  <p className="text-gray-900 mt-2 font-bold uppercase">{settings?.ownerName || "Administrator"}</p>
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>

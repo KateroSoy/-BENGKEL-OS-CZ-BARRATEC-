@@ -9,6 +9,7 @@ export interface Service {
   name: string;
   estimatedDuration: number;
   estimatedPrice: number;
+  imageUrl?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -24,16 +25,33 @@ export interface Technician {
   updatedAt: string;
 }
 
+export interface PromoPackage {
+  id: string;
+  name: string;
+  description: string;
+  originalPrice: number;
+  promoPrice: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Settings {
   id: string;
   workshopName: string;
-  phone: string;
   address: string;
+  phone: string;
+  logoUrl?: string;
+  bankName?: string;
+  bankAccountName?: string;
+  bankAccountNumber?: string;
   openTime: string;
   closeTime: string;
   maxBookingPerSlot: number;
   slotIntervalMinutes: number;
   operationalDays: null;
+  carTypes: string[];
+  problemOptions: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -58,6 +76,7 @@ export interface Booking {
   customerNote: string | null;
   adminNote: string | null;
   estimatedFinishTime: string | null;
+  paymentProofBase64?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,16 +109,45 @@ const technicians: Technician[] = [
   { id: "tech-4", name: "Rudi Hartono", phone: "084444444444", specialty: "Body & Cat", isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
+const promos: PromoPackage[] = [
+  {
+    id: "promo-1",
+    name: "Paket Liburan Aman (Oli + Tune Up)",
+    description: "Ganti oli mesin (4L) + Filter + Tune Up lengkap + Pengecekan 20 titik kendaraan.",
+    originalPrice: 850000,
+    promoPrice: 599000,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "promo-2",
+    name: "Paket Kaki-Kaki Prima",
+    description: "Spooring, Balancing 4 roda, dan pembersihan rem depan belakang.",
+    originalPrice: 450000,
+    promoPrice: 299000,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+];
+
 const settings: Settings = {
   id: "settings-main",
   workshopName: "BENGKEL OS CZ-BARRATEC",
-  phone: "08123456789",
-  address: "Jl. Otomotif Raya No. 1, Jakarta Selatan",
+  address: "Jl. Raya Otomotif No. 123, Jakarta Selatan",
+  phone: "081234567890",
+  logoUrl: "",
+  bankName: "BCA",
+  bankAccountName: "Bengkel OS CZ-BARRATEC",
+  bankAccountNumber: "1234567890",
   openTime: "08:00",
   closeTime: "17:00",
   maxBookingPerSlot: 3,
   slotIntervalMinutes: 60,
   operationalDays: null,
+  carTypes: ["Toyota Avanza", "Honda Brio", "Toyota Innova", "Daihatsu Xenia", "Honda HR-V", "Lainnya"],
+  problemOptions: ["Servis rutin berkala", "Ganti Oli", "Pengecekan Kaki-kaki", "AC tidak dingin", "Lainnya"],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
@@ -238,6 +286,30 @@ export function addTechnician(data: { name: string; specialty?: string }): { id:
     name: data.name,
     phone: "",
     specialty: data.specialty || "",
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  return { id };
+}
+
+// ---- Promos ----
+export function getPromos(): PromoPackage[] {
+  return promos;
+}
+
+export function getActivePromos(): PromoPackage[] {
+  return promos.filter(p => p.isActive);
+}
+
+export function addPromo(data: { name: string; description: string; originalPrice: number; promoPrice: number }): { id: string } {
+  const id = `promo-${Date.now()}`;
+  promos.push({
+    id,
+    name: data.name,
+    description: data.description,
+    originalPrice: data.originalPrice,
+    promoPrice: data.promoPrice,
     isActive: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
