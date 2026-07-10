@@ -7,6 +7,7 @@ import {
   LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
 import { getReports, getSettings } from "../../lib/mockApi";
+import { useTranslation } from "../../lib/i18n/LanguageContext";
 
 // Mock Data
 const generateMockTrend = () => {
@@ -30,6 +31,7 @@ const MOCK_SERVICE_DATA = [
 ];
 
 export default function Reports() {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -112,11 +114,11 @@ export default function Reports() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Laporan Booking</h1>
-          <p className="text-gray-500 mt-1">Rekap data booking dan performa</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('rpt.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('rpt.subtitle')}</p>
         </div>
         <Button onClick={handlePrint} variant="outline" className="flex gap-2">
-          <Printer className="h-4 w-4" /> Cetak Laporan
+          <Printer className="h-4 w-4" /> {t('rpt.print')}
         </Button>
       </div>
 
@@ -136,7 +138,7 @@ export default function Reports() {
               <h1 className="text-2xl print:text-xl font-extrabold text-gray-900 tracking-tight uppercase">
                 {settings?.workshopName || "BENGKEL OS CZ-BARRATEC"}
               </h1>
-              <p className="text-gray-600 font-medium mt-1 text-lg">Laporan Keuangan & Operasional</p>
+              <p className="text-gray-600 font-medium mt-1 text-lg">{t('rpt.print.title')}</p>
               <div className="text-sm text-gray-500 mt-2 flex flex-col gap-0.5">
                 <p>{settings?.address}</p>
                 <p>Telp/WA: {settings?.phone}</p>
@@ -144,9 +146,9 @@ export default function Reports() {
             </div>
           </div>
           <div className="text-right text-sm text-gray-500 self-end bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <p className="font-bold text-gray-700 mb-1">Periode Laporan:</p>
+            <p className="font-bold text-gray-700 mb-1">{t('rpt.print.period')}</p>
             <p>{format(new Date(startDate), "dd MMM yyyy")} - {format(new Date(endDate), "dd MMM yyyy")}</p>
-            <p className="mt-2 text-xs">Dicetak: {format(new Date(), "dd MMM yyyy HH:mm")}</p>
+            <p className="mt-2 text-xs">{t('rpt.print.printed')} {format(new Date(), "dd MMM yyyy HH:mm")}</p>
           </div>
         </div>
       </div>
@@ -155,47 +157,47 @@ export default function Reports() {
       <Card className="print:hidden">
         <CardContent className="pt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4">
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Dari Tanggal</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">{t('rpt.filter.from')}</label>
             <Input type="date" value={startDate} onChange={e => { setStartDate(e.target.value); setCurrentPage(1); }} />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Sampai Tanggal</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">{t('rpt.filter.to')}</label>
             <Input type="date" value={endDate} onChange={e => { setEndDate(e.target.value); setCurrentPage(1); }} />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Status</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">{t('rpt.filter.status')}</label>
             <Select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}>
-              <option value="">Semua Status</option>
+              <option value="">{t('rpt.filter.allstatus')}</option>
               <option value="Selesai">Selesai</option>
               <option value="Batal">Batal</option>
               <option value="Tidak Datang">Tidak Datang</option>
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Layanan</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">{t('rpt.filter.service')}</label>
             <Select value={serviceFilter} onChange={e => { setServiceFilter(e.target.value); setCurrentPage(1); }}>
-              <option value="">Semua Layanan</option>
+              <option value="">{t('rpt.filter.allservice')}</option>
               {uniqueServices.map((svc: any) => (
                 <option key={svc} value={svc}>{svc}</option>
               ))}
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Urutkan</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">{t('rpt.filter.sort')}</label>
             <Select value={sortOrder} onChange={e => { setSortOrder(e.target.value); setCurrentPage(1); }}>
-              <option value="newest">Terbaru</option>
-              <option value="oldest">Terlama</option>
-              <option value="price_desc">Harga Tertinggi</option>
-              <option value="price_asc">Harga Terendah</option>
+              <option value="newest">{t('rpt.filter.newest')}</option>
+              <option value="oldest">{t('rpt.filter.oldest')}</option>
+              <option value="price_desc">{t('rpt.filter.price.desc')}</option>
+              <option value="price_asc">{t('rpt.filter.price.asc')}</option>
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Pencarian</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">{t('rpt.filter.search')}</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input 
                 type="text" 
-                placeholder="Nama, Kode, Plat..." 
+                placeholder={t('rpt.filter.search.ph')}
                 value={searchQuery}
                 onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 className="pl-9"
@@ -217,7 +219,7 @@ export default function Reports() {
                 <Activity className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">Total Booking</p>
+                <p className="text-sm font-medium text-gray-500">{t('rpt.kpi.total')}</p>
                 <p className="text-2xl font-bold text-gray-900">{bookings.length}</p>
               </div>
             </div>
@@ -234,7 +236,7 @@ export default function Reports() {
                 <CheckCircle className="h-6 w-6 text-emerald-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">Booking Selesai</p>
+                <p className="text-sm font-medium text-gray-500">{t('rpt.kpi.done')}</p>
                 <p className="text-2xl font-bold text-gray-900">{completedCount}</p>
               </div>
             </div>
@@ -251,7 +253,7 @@ export default function Reports() {
                 <XCircle className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">Booking Batal</p>
+                <p className="text-sm font-medium text-gray-500">{t('rpt.kpi.cancel')}</p>
                 <p className="text-2xl font-bold text-gray-900">{cancelledCount}</p>
               </div>
             </div>
@@ -265,7 +267,7 @@ export default function Reports() {
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">Total Revenue</p>
+                <p className="text-sm font-medium text-gray-500">{t('rpt.kpi.revenue')}</p>
                 <p className="text-xl font-bold text-gray-900 truncate">
                   Rp {totalRevenue.toLocaleString('id-ID')}
                 </p>
@@ -279,7 +281,7 @@ export default function Reports() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:hidden">
         <Card>
           <CardHeader className="print:pb-2">
-            <CardTitle className="text-lg">Tren Booking (7 Hari Terakhir)</CardTitle>
+            <CardTitle className="text-lg">{t('rpt.chart.trend')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] print:h-[250px]">
@@ -290,8 +292,8 @@ export default function Reports() {
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
                   <Tooltip cursor={{ fill: '#f3f4f6' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
-                  <Bar dataKey="selesai" name="Selesai" fill="#10b981" radius={[4, 4, 0, 0]} barSize={30} />
-                  <Bar dataKey="batal" name="Batal/Gagal" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={30} />
+                  <Bar dataKey="selesai" name={t('rpt.chart.done')} fill="#10b981" radius={[4, 4, 0, 0]} barSize={30} />
+                  <Bar dataKey="batal" name={t('rpt.chart.fail')} fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={30} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -300,7 +302,7 @@ export default function Reports() {
 
         <Card className="print:shadow-none print:border-gray-300">
           <CardHeader className="print:pb-2">
-            <CardTitle className="text-lg">Distribusi Layanan (Demo)</CardTitle>
+            <CardTitle className="text-lg">{t('rpt.chart.dist')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] print:h-[250px]">
@@ -331,10 +333,10 @@ export default function Reports() {
 
       {/* Table Data - forces page break before it in print if it's long */}
       <div className="print:page-break-before-auto print:mt-8">
-        <h3 className="text-lg font-bold text-gray-900 mb-4 hidden print:block border-b-2 border-gray-800 pb-2">Rincian Data Booking</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-4 hidden print:block border-b-2 border-gray-800 pb-2">{t('rpt.table.title')}</h3>
         
         {loading ? (
-          <div className="text-center py-12 text-gray-500 print:hidden">Memuat laporan...</div>
+          <div className="text-center py-12 text-gray-500 print:hidden">{t('rpt.loading')}</div>
         ) : (
           <>
             {/* Screen View Table (Paginated) */}
@@ -343,20 +345,20 @@ export default function Reports() {
               <table className="w-full text-sm text-left print:text-[11px]">
                 <thead className="bg-gray-50 print:bg-white text-gray-600 print:text-gray-900 font-medium border-b border-gray-100 print:border-gray-300">
                   <tr>
-                    <th className="px-4 py-3 print:px-2 print:py-2">TANGGAL</th>
-                    <th className="px-4 py-3 print:px-2 print:py-2">KODE</th>
-                    <th className="px-4 py-3 print:px-2 print:py-2">KONSUMEN</th>
-                    <th className="px-4 py-3 print:px-2 print:py-2">KENDARAAN</th>
-                    <th className="px-4 py-3 print:px-2 print:py-2">LAYANAN</th>
-                    <th className="px-4 py-3 print:px-2 print:py-2">STATUS</th>
-                    <th className="px-4 py-3 print:px-2 print:py-2 text-right">BIAYA (EST)</th>
+                    <th className="px-4 py-3 print:px-2 print:py-2">{t('rpt.th.date')}</th>
+                    <th className="px-4 py-3 print:px-2 print:py-2">{t('rpt.th.code')}</th>
+                    <th className="px-4 py-3 print:px-2 print:py-2">{t('rpt.th.customer')}</th>
+                    <th className="px-4 py-3 print:px-2 print:py-2">{t('rpt.th.vehicle')}</th>
+                    <th className="px-4 py-3 print:px-2 print:py-2">{t('rpt.th.service')}</th>
+                    <th className="px-4 py-3 print:px-2 print:py-2">{t('rpt.th.status')}</th>
+                    <th className="px-4 py-3 print:px-2 print:py-2 text-right">{t('rpt.th.cost')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 print:divide-gray-200">
                   {paginatedBookings.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-4 py-8 text-center text-gray-500 print:py-4">
-                        Belum ada data laporan / Tidak ada yang cocok dengan pencarian
+                        {t('rpt.empty')}
                       </td>
                     </tr>
                   ) : (
@@ -385,10 +387,10 @@ export default function Reports() {
                   <tfoot className="bg-blue-50/50 print:bg-gray-100 border-t-2 border-blue-100 print:border-gray-300 font-bold text-gray-900">
                     <tr>
                       <td colSpan={5} className="px-4 py-3 print:px-2 print:py-2 text-right">
-                        Total {filteredBookings.length} Data Tersaring
+                        {t('rpt.total.filtered').replace('{{count}}', filteredBookings.length.toString())}
                       </td>
                       <td className="px-4 py-3 print:px-2 print:py-2 text-right">
-                        Total Estimasi Biaya
+                        {t('rpt.total.est')}
                       </td>
                       <td className="px-4 py-3 print:px-2 print:py-2 text-right text-blue-700 print:text-gray-900">
                         Rp {filteredTotalRevenue.toLocaleString('id-ID')}
@@ -403,7 +405,7 @@ export default function Reports() {
             {filteredBookings.length > 0 && (
               <div className="px-4 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-sm text-gray-500">
-                  Menampilkan <span className="font-medium text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> hingga <span className="font-medium text-gray-900">{Math.min(currentPage * itemsPerPage, filteredBookings.length)}</span> dari <span className="font-medium text-gray-900">{filteredBookings.length}</span> data
+                  {t('rpt.showing')} <span className="font-medium text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> {t('rpt.to')} <span className="font-medium text-gray-900">{Math.min(currentPage * itemsPerPage, filteredBookings.length)}</span> {t('rpt.of')} <span className="font-medium text-gray-900">{filteredBookings.length}</span> {t('rpt.data')}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
@@ -412,10 +414,10 @@ export default function Reports() {
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
                   >
-                    <ChevronLeft className="w-4 h-4 mr-1" /> Sebelumnya
+                    <ChevronLeft className="w-4 h-4 mr-1" /> {t('rpt.prev')}
                   </Button>
                   <div className="text-sm font-medium text-gray-700 px-2">
-                    Hal {currentPage} dari {totalPages}
+                    {t('rpt.page').replace('{{current}}', currentPage.toString()).replace('{{total}}', totalPages.toString())}
                   </div>
                   <Button 
                     variant="outline" 
@@ -423,7 +425,7 @@ export default function Reports() {
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
                   >
-                    Selanjutnya <ChevronRight className="w-4 h-4 ml-1" />
+                    {t('rpt.next')} <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
               </div>
@@ -435,19 +437,19 @@ export default function Reports() {
               <table className="w-full text-xs text-left border-collapse" style={{ tableLayout: 'auto' }}>
                 <thead className="bg-gray-100 text-gray-900 font-bold border-y-2 border-gray-800">
                   <tr>
-                    <th className="px-1 py-2 w-[15%]">TANGGAL</th>
-                    <th className="px-1 py-2 w-[15%]">KODE</th>
-                    <th className="px-1 py-2 w-[18%]">KONSUMEN</th>
-                    <th className="px-1 py-2 w-[18%]">KENDARAAN</th>
-                    <th className="px-1 py-2 w-[14%]">LAYANAN</th>
-                    <th className="px-1 py-2 w-[10%]">STATUS</th>
-                    <th className="px-1 py-2 w-[10%] text-right">BIAYA</th>
+                    <th className="px-1 py-2 w-[15%]">{t('rpt.th.date')}</th>
+                    <th className="px-1 py-2 w-[15%]">{t('rpt.th.code')}</th>
+                    <th className="px-1 py-2 w-[18%]">{t('rpt.th.customer')}</th>
+                    <th className="px-1 py-2 w-[18%]">{t('rpt.th.vehicle')}</th>
+                    <th className="px-1 py-2 w-[14%]">{t('rpt.th.service')}</th>
+                    <th className="px-1 py-2 w-[10%]">{t('rpt.th.status')}</th>
+                    <th className="px-1 py-2 w-[10%] text-right">{t('rpt.th.cost')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-300">
                   {filteredBookings.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-1 py-4 text-center text-gray-500">Tidak ada data laporan</td>
+                      <td colSpan={7} className="px-1 py-4 text-center text-gray-500">{t('rpt.empty')}</td>
                     </tr>
                   ) : (
                     filteredBookings.map((b) => (
@@ -474,8 +476,8 @@ export default function Reports() {
                 {filteredBookings.length > 0 && (
                   <tfoot className="border-t-2 border-gray-800 font-bold text-gray-900 bg-gray-50">
                     <tr>
-                      <td colSpan={5} className="px-1 py-2 text-right">Total {filteredBookings.length} Data Tersaring</td>
-                      <td className="px-1 py-2 text-right">Total Estimasi</td>
+                      <td colSpan={5} className="px-1 py-2 text-right">{t('rpt.total.filtered').replace('{{count}}', filteredBookings.length.toString())}</td>
+                      <td className="px-1 py-2 text-right">{t('rpt.total.est')}</td>
                       <td className="px-1 py-2 text-right whitespace-nowrap">Rp {filteredTotalRevenue.toLocaleString('id-ID')}</td>
                     </tr>
                   </tfoot>
@@ -488,7 +490,7 @@ export default function Reports() {
                   <p className="text-gray-900 mb-16">
                     {settings?.address?.split(',')[0] || "Jakarta"}, {format(new Date(), "dd MMMM yyyy")}
                     <br />
-                    Mengetahui,
+                    {t('rpt.sign.known')}
                   </p>
                   <div className="w-48 border-b border-gray-800 mx-auto"></div>
                   <p className="text-gray-900 mt-2 font-bold uppercase">{settings?.ownerName || "Administrator"}</p>
