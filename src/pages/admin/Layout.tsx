@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Calendar as CalendarIcon, Users, Settings, LogOut, Wrench, FileText, PlusCircle, BarChart, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Calendar as CalendarIcon, Users, Settings, LogOut, Wrench, FileText, PlusCircle, BarChart, ChevronRight, Tag } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useState, useEffect } from "react";
 import { ProductTour } from "../../components/ProductTour";
@@ -11,6 +11,7 @@ const navigation = [
   { name: 'Kalender Booking', href: '/admin/calendar', icon: CalendarIcon },
   { name: 'Tambah Booking', href: '/admin/bookings/new', icon: PlusCircle },
   { name: 'Layanan & Teknisi', href: '/admin/services', icon: Users },
+  { name: 'Promosi', href: '/admin/promotions', icon: Tag },
   { name: 'Laporan', href: '/admin/reports', icon: BarChart },
   { name: 'Pengaturan', href: '/admin/settings', icon: Settings },
 ];

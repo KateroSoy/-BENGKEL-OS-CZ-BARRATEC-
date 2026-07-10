@@ -36,6 +36,17 @@ export interface PromoPackage {
   updatedAt: string;
 }
 
+export interface Campaign {
+  id: number;
+  name: string;
+  code: string;
+  discount: number;
+  status: string;
+  startDate: string;
+  endDate: string;
+  uses: number;
+}
+
 export interface Settings {
   id: string;
   workshopName: string;
@@ -130,6 +141,12 @@ const promos: PromoPackage[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
+];
+
+const campaigns: Campaign[] = [
+  { id: 1, name: "Diskon Ganti Oli Akhir Tahun", code: "OLI2026", discount: 15, status: "Active", startDate: "2026-11-01", endDate: "2026-12-31", uses: 45 },
+  { id: 2, name: "Promo Merdeka Tune Up", code: "MERDEKA45", discount: 20, status: "Ended", startDate: "2026-08-01", endDate: "2026-08-31", uses: 120 },
+  { id: 3, name: "Pelanggan Baru", code: "WELCOME10", discount: 10, status: "Active", startDate: "2026-01-01", endDate: "2026-12-31", uses: 230 },
 ];
 
 const settings: Settings = {
@@ -315,6 +332,21 @@ export function addPromo(data: { name: string; description: string; originalPric
     updatedAt: new Date().toISOString(),
   });
   return { id };
+}
+
+// ---- Campaigns ----
+export function getCampaigns(): Campaign[] {
+  return [...campaigns].sort((a, b) => b.id - a.id);
+}
+
+export function addCampaign(data: Omit<Campaign, 'id' | 'uses'>): { id: number } {
+  const newId = campaigns.length > 0 ? Math.max(...campaigns.map(c => c.id)) + 1 : 1;
+  campaigns.push({
+    ...data,
+    id: newId,
+    uses: 0,
+  });
+  return { id: newId };
 }
 
 // ---- Settings ----

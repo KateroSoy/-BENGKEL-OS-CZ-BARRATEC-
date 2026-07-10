@@ -100,7 +100,7 @@ export default function BookingSuccess() {
           </div>
 
           <div className="mt-8 text-center print:hidden">
-            <Link to="/" className="text-sm text-[var(--color-primary)] hover:underline">Kembali ke Beranda</Link>
+            <Link to="/home" className="text-sm text-[var(--color-primary)] hover:underline">Kembali ke Beranda</Link>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@
  */
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Portal from "./pages/public/Portal";
 import Landing from "./pages/public/Landing";
 import BookingForm from "./pages/public/BookingForm";
 import BookingSuccess from "./pages/public/BookingSuccess";
@@ -17,12 +18,14 @@ import Calendar from "./pages/admin/Calendar";
 import Services from "./pages/admin/Services";
 import Reports from "./pages/admin/Reports";
 import Settings from "./pages/admin/Settings";
+import Promotions from "./pages/admin/Promotions";
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<Portal />} />
+        <Route path="/home" element={<Landing />} />
         <Route path="/booking" element={<BookingForm />} />
         <Route path="/booking/success" element={<BookingSuccess />} />
         
@@ -37,6 +40,7 @@ export default function App() {
           <Route path="calendar" element={<Calendar />} />
           <Route path="services" element={<Services />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="promotions" element={<Promotions />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>

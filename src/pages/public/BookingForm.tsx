@@ -306,7 +306,7 @@ export default function BookingForm() {
       
       {/* Header */}
       <div className="bg-white border-b border-[var(--color-border-subtle)] px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
-        <Link to="/" className="flex items-center gap-2 hover:text-[var(--color-primary)] transition-colors text-[var(--color-text-secondary)]">
+        <Link to="/home" className="flex items-center gap-2 hover:text-[var(--color-primary)] transition-colors text-[var(--color-text-secondary)]">
           <ArrowLeft className="w-5 h-5" /> <span className="font-bold hidden sm:inline">Kembali</span>
         </Link>
         <span className="font-display font-bold text-xl uppercase tracking-widest text-center flex-1">{settings.workshopName}</span>
