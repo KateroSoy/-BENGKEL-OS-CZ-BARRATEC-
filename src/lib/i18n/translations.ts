@@ -134,11 +134,37 @@ export const translations = {
     "booking.f.vehicle": "Vehicle",
     "booking.f.service": "Service",
 
-    // Booking Success
     "booking.s.title": "Booking Successfully Submitted",
     "booking.s.code": "Booking Code:",
     "booking.s.status": "Status: Awaiting Confirmation (Est. 15 mins)",
     "booking.s.detail": "Reservation Details",
+
+    // Landing Page Services & Extras
+    "landing.srv.1.name": "Oil & Filter Change",
+    "landing.srv.1.desc": "Routine maintenance for optimal engine.",
+    "landing.srv.2.name": "Brakes & Suspension",
+    "landing.srv.2.desc": "Maximum safety for your journey.",
+    "landing.srv.3.name": "Battery & Electrical",
+    "landing.srv.3.desc": "Precision electrical system diagnosis.",
+    "landing.srv.4.name": "Car AC Service",
+    "landing.srv.4.desc": "Cool cabin and clean air circulation.",
+
+    "landing.why.1": "Accurate Diagnosis",
+    "landing.why.2": "Original Spare Parts",
+    "landing.why.3": "Reliable Technicians",
+    "landing.why.4": "Service Warranty",
+    "landing.why.5": "Clear Estimation",
+    "landing.why.6": "Fast Communication",
+
+    "landing.rev.1.text": "\"Fast, transparent, and satisfying service. Upfront price estimation so there are no surprise costs. Very professional.\"",
+    "landing.rev.1.name": "Budi Santoso",
+    "landing.rev.1.car": "Toyota Fortuner",
+    "landing.rev.2.text": "\"The mechanics are highly skilled and friendly. They explained the issue clearly. The waiting room is comfortable too.\"",
+    "landing.rev.2.name": "Siti Rahayu",
+    "landing.rev.2.car": "Honda Brio",
+    "landing.rev.3.text": "\"Booking via the website is incredibly easy, no more long queues. They even have a convenient pick-up service.\"",
+    "landing.rev.3.name": "Andi Wirawan",
+    "landing.rev.3.car": "Mitsubishi Pajero",
     "booking.s.name": "Customer Name",
     "booking.s.srv": "Vehicle & Service",
     "booking.s.schedule": "Arrival Schedule",
@@ -605,6 +631,33 @@ export const translations = {
     "booking.s.new": "Buat Booking Baru",
     "booking.s.home": "Kembali ke Beranda",
     "booking.s.wamessage": "Halo Admin, saya {{name}}. Saya sudah membuat booking dengan kode {{code}} untuk kendaraan {{car}} pada {{date}} jam {{time}}. Mohon konfirmasinya.",
+
+    // Landing Page Services & Extras
+    "landing.srv.1.name": "Ganti Oli & Filter",
+    "landing.srv.1.desc": "Perawatan rutin untuk mesin optimal.",
+    "landing.srv.2.name": "Rem & Kaki-kaki",
+    "landing.srv.2.desc": "Keamanan maksimal perjalanan Anda.",
+    "landing.srv.3.name": "Aki & Kelistrikan",
+    "landing.srv.3.desc": "Diagnosa presisi sistem kelistrikan.",
+    "landing.srv.4.name": "Servis AC Mobil",
+    "landing.srv.4.desc": "Kabin sejuk sirkulasi udara bersih.",
+
+    "landing.why.1": "Diagnosa Akurat",
+    "landing.why.2": "Suku Cadang Asli",
+    "landing.why.3": "Teknisi Handal",
+    "landing.why.4": "Garansi Layanan",
+    "landing.why.5": "Estimasi Jelas",
+    "landing.why.6": "Komunikasi Cepat",
+
+    "landing.rev.1.text": "\"Pelayanan cepat, transparan, dan memuaskan. Estimasi harga di awal jadi tidak ada biaya kejutan. Sangat profesional.\"",
+    "landing.rev.1.name": "Budi Santoso",
+    "landing.rev.1.car": "Toyota Fortuner",
+    "landing.rev.2.text": "\"Mekaniknya sangat handal dan ramah. Penjelasan masalah mobil sangat jelas. Ruang tunggunya juga nyaman.\"",
+    "landing.rev.2.name": "Siti Rahayu",
+    "landing.rev.2.car": "Honda Brio",
+    "landing.rev.3.text": "\"Booking lewat website sangat mudah, tidak perlu antre panjang lagi. Layanan antar jemputnya sangat membantu.\"",
+    "landing.rev.3.name": "Andi Wirawan",
+    "landing.rev.3.car": "Mitsubishi Pajero",
 
     // Misc Admin
     "admin.dashboard": "Dashboard",

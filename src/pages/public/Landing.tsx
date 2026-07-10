@@ -179,10 +179,10 @@ export default function Landing() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
             {[
-              { id: '01', name: "Ganti Oli & Filter", img: "/images/service_oli.png", desc: "Perawatan rutin untuk mesin optimal." },
-              { id: '02', name: "Rem & Kaki-kaki", img: "/images/service_rem.png", desc: "Keamanan maksimal perjalanan Anda." },
-              { id: '03', name: "Aki & Kelistrikan", img: "/images/service_aki.png", desc: "Diagnosa presisi sistem kelistrikan." },
-              { id: '04', name: "Servis AC Mobil", img: "/images/service_ac.png", desc: "Kabin sejuk sirkulasi udara bersih." },
+              { id: '01', name: t('landing.srv.1.name'), img: "/images/service_oli.png", desc: t('landing.srv.1.desc') },
+              { id: '02', name: t('landing.srv.2.name'), img: "/images/service_rem.png", desc: t('landing.srv.2.desc') },
+              { id: '03', name: t('landing.srv.3.name'), img: "/images/service_aki.png", desc: t('landing.srv.3.desc') },
+              { id: '04', name: t('landing.srv.4.name'), img: "/images/service_ac.png", desc: t('landing.srv.4.desc') },
             ].map((srv, i) => (
               <div key={i} className="group flex flex-col cursor-pointer">
                 <div className="h-[280px] overflow-hidden mb-5 bg-gray-50 rounded-sm">
@@ -231,9 +231,9 @@ export default function Landing() {
             
             <div className="grid sm:grid-cols-2 gap-y-6 gap-x-8">
               {[
-                "Diagnosa Akurat", "Suku Cadang Asli", 
-                "Teknisi Handal", "Garansi Layanan", 
-                "Estimasi Jelas", "Komunikasi Cepat"
+                t('landing.why.1'), t('landing.why.2'), 
+                t('landing.why.3'), t('landing.why.4'), 
+                t('landing.why.5'), t('landing.why.6')
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3 pb-3 border-b border-black/5">
                   <Check className="w-4 h-4 text-black" />
@@ -253,15 +253,19 @@ export default function Landing() {
         <div className="max-w-[1440px] mx-auto px-6 md:px-12">
           <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter mb-16 text-black">{t('reviews.title')}</h2>
           <div className="grid md:grid-cols-3 gap-12">
-            {[1,2,3].map((_, i) => (
+            {[
+              { text: t('landing.rev.1.text'), name: t('landing.rev.1.name'), car: t('landing.rev.1.car') },
+              { text: t('landing.rev.2.text'), name: t('landing.rev.2.name'), car: t('landing.rev.2.car') },
+              { text: t('landing.rev.3.text'), name: t('landing.rev.3.name'), car: t('landing.rev.3.car') }
+            ].map((rev, i) => (
               <div key={i} className="flex flex-col border-l-2 border-black pl-6 py-1">
                 <div className="flex gap-1 mb-6">
                   {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-black text-black" />)}
                 </div>
-                <p className="text-black font-medium text-base leading-relaxed mb-8">"Pelayanan cepat, transparan, dan memuaskan. Estimasi harga di awal jadi tidak ada biaya kejutan. Sangat profesional."</p>
+                <p className="text-black font-medium text-base leading-relaxed mb-8">{rev.text}</p>
                 <div>
-                  <p className="font-bold text-black uppercase tracking-widest text-xs mb-1">Budi Santoso</p>
-                  <p className="text-xs text-gray-500 uppercase tracking-widest">Toyota Fortuner</p>
+                  <p className="font-bold text-black uppercase tracking-widest text-xs mb-1">{rev.name}</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-widest">{rev.car}</p>
                 </div>
               </div>
             ))}
