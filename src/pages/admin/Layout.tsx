@@ -4,21 +4,23 @@ import { cn } from "../../lib/utils";
 import { useState, useEffect } from "react";
 import { ProductTour } from "../../components/ProductTour";
 import { logout as mockLogout } from "../../lib/mockApi";
+import { useTranslation } from "../../lib/i18n/LanguageContext";
 
-const navigation = [
-  { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { name: 'Booking Hari Ini', href: '/admin/bookings/today', icon: FileText },
-  { name: 'Kalender Booking', href: '/admin/calendar', icon: CalendarIcon },
-  { name: 'Tambah Booking', href: '/admin/bookings/new', icon: PlusCircle },
-  { name: 'Layanan & Teknisi', href: '/admin/services', icon: Users },
-  { name: 'Promosi', href: '/admin/promotions', icon: Tag },
-  { name: 'Laporan', href: '/admin/reports', icon: BarChart },
-  { name: 'Pengaturan', href: '/admin/settings', icon: Settings },
+const navigationBase = [
+  { key: 'admin.dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { key: 'admin.bookings.today', defaultText: 'Booking Hari Ini', href: '/admin/bookings/today', icon: FileText },
+  { key: 'admin.calendar', defaultText: 'Kalender Booking', href: '/admin/calendar', icon: CalendarIcon },
+  { key: 'admin.bookings.new', defaultText: 'Tambah Booking', href: '/admin/bookings/new', icon: PlusCircle },
+  { key: 'admin.services', defaultText: 'Layanan & Teknisi', href: '/admin/services', icon: Users },
+  { key: 'admin.promotions', href: '/admin/promotions', icon: Tag },
+  { key: 'admin.reports', href: '/admin/reports', icon: BarChart },
+  { key: 'admin.settings', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, language, setLanguage } = useTranslation();
   const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
@@ -40,9 +42,6 @@ export default function AdminLayout() {
     navigate('/admin/login');
   };
 
-  // Get active menu name for header
-  const activeMenu = navigation.find(n => location.pathname.startsWith(n.href))?.name || 'Dashboard';
-
   return (
     <div className="flex h-screen print:h-auto bg-[#FAFAFA] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 print:bg-white overflow-hidden">
       
@@ -59,11 +58,12 @@ export default function AdminLayout() {
             <span className="text-lg font-bold tracking-tight text-slate-900">BENGKEL OS</span>
           </div>
           <nav className="mt-2 flex-1 px-4 space-y-1.5">
-            {navigation.map((item) => {
+            {navigationBase.map((item) => {
               const isActive = location.pathname.startsWith(item.href);
+              const name = t(item.key as any) === item.key ? (item.defaultText || t(item.key as any)) : t(item.key as any);
               return (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   to={item.href}
                   className={cn(
                     isActive 
@@ -79,7 +79,7 @@ export default function AdminLayout() {
                     )}
                     aria-hidden="true"
                   />
-                  {item.name}
+                  {name}
                 </Link>
               );
             })}
@@ -110,10 +110,12 @@ export default function AdminLayout() {
         <header className="hidden md:flex h-20 items-center justify-between px-8 backdrop-blur-md bg-white/40 border-b border-slate-200/50 sticky top-0 z-30">
           <div className="flex items-center text-sm text-slate-500 font-medium">
             <span>Workspace</span>
-            <ChevronRight className="w-4 h-4 mx-2 text-slate-300" />
-            <span className="text-slate-900">{activeMenu}</span>
           </div>
           <div className="flex items-center gap-4">
+            <div className="flex bg-slate-100 rounded-lg p-1 mr-2">
+              <button onClick={() => setLanguage('en')} className={`px-3 py-1 text-xs font-bold uppercase rounded-md transition-colors ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:bg-slate-200'}`}>EN</button>
+              <button onClick={() => setLanguage('id')} className={`px-3 py-1 text-xs font-bold uppercase rounded-md transition-colors ${language === 'id' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:bg-slate-200'}`}>ID</button>
+            </div>
             <div className="text-sm font-medium text-slate-900 px-4 py-2 bg-white rounded-full border border-slate-200/60 shadow-sm">
               Portal Admin
             </div>
@@ -130,11 +132,12 @@ export default function AdminLayout() {
       {/* Bottom Nav - Mobile */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-t border-slate-200 safe-area-pb print:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
         <div className="flex justify-around items-center h-16">
-          {navigation.slice(0, 4).map((item) => {
+          {navigationBase.slice(0, 4).map((item) => {
             const isActive = location.pathname === item.href;
+            const name = t(item.key as any) === item.key ? (item.defaultText || t(item.key as any)) : t(item.key as any);
             return (
               <Link
-                key={item.name}
+                key={item.href}
                 to={item.href}
                 className={cn(
                   "flex flex-col items-center justify-center w-full h-full space-y-1 relative",
@@ -147,7 +150,7 @@ export default function AdminLayout() {
                   />
                 )}
                 <item.icon className={cn("h-5 w-5", isActive && "text-blue-600")} strokeWidth={isActive ? 2.5 : 2} />
-                <span className="text-[10px] font-medium tracking-wide">{item.name.split(' ')[0]}</span>
+                <span className="text-[10px] font-medium tracking-wide">{name.split(' ')[0]}</span>
               </Link>
             );
           })}

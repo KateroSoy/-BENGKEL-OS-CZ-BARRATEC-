@@ -2,8 +2,10 @@ import { Link, useLocation } from "react-router-dom";
 import { CheckCircle2, MapPin, MessageCircle, Download, RotateCcw, Calendar, User, Wrench, Clock, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getSettings } from "../../lib/mockApi";
+import { useTranslation } from "../../lib/i18n/LanguageContext";
 
 export default function BookingSuccess() {
+  const { t } = useTranslation();
   const location = useLocation();
   const booking = location.state?.booking;
   const [settings, setSettings] = useState<any>(null);
@@ -14,7 +16,14 @@ export default function BookingSuccess() {
 
   const bookingCode = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  const waMessage = `Halo Admin, saya ${booking?.customerName || 'Pelanggan'}. Saya sudah membuat booking dengan kode ${bookingCode} untuk kendaraan ${booking?.carBrand || ''} ${booking?.carModel || ''} pada ${booking?.bookingDate || ''} jam ${booking?.bookingTime || ''}. Mohon konfirmasinya.`;
+  const rawMsg = t('booking.s.wamessage');
+  const waMessage = rawMsg
+    .replace('{{name}}', booking?.customerName || 'Customer')
+    .replace('{{code}}', bookingCode)
+    .replace('{{car}}', `${booking?.carBrand || ''} ${booking?.carModel || ''}`)
+    .replace('{{date}}', booking?.bookingDate || '')
+    .replace('{{time}}', booking?.bookingTime || '');
+    
   const waLink = settings?.phone ? `https://wa.me/${settings.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMessage)}` : '#';
 
   const handleSave = () => {
@@ -34,23 +43,23 @@ export default function BookingSuccess() {
             <div className="w-20 h-20 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center mb-6 border border-[var(--color-success)]/30">
               <CheckCircle2 className="w-10 h-10 text-[var(--color-success)]" />
             </div>
-            <h1 className="font-display text-3xl font-bold uppercase mb-2">Booking Berhasil Dikirim</h1>
-            <p className="text-[var(--color-text-secondary)]">Kode Booking: <strong className="text-white text-lg ml-2 tracking-widest">{bookingCode}</strong></p>
+            <h1 className="font-display text-3xl font-bold uppercase mb-2">{t('booking.s.title')}</h1>
+            <p className="text-[var(--color-text-secondary)]">{t('booking.s.code')} <strong className="text-white text-lg ml-2 tracking-widest">{bookingCode}</strong></p>
             
             <div className="mt-6 flex items-center gap-2 bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-4 py-2 rounded text-sm font-bold border border-[var(--color-warning)]/20">
               <Clock className="w-4 h-4" />
-              Status: Menunggu Konfirmasi (Estimasi 15 menit)
+              {t('booking.s.status')}
             </div>
           </div>
 
           <div className="space-y-6 mb-10">
-            <h3 className="font-bold uppercase tracking-widest text-[var(--color-text-secondary)] text-sm mb-4">Detail Reservasi</h3>
+            <h3 className="font-bold uppercase tracking-widest text-[var(--color-text-secondary)] text-sm mb-4">{t('booking.s.detail')}</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[var(--color-background)] p-6 rounded border border-[var(--color-border-subtle)]">
               <div className="flex gap-3">
                 <User className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
                 <div>
-                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">Nama Pelanggan</p>
+                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">{t('booking.s.name')}</p>
                   <p className="font-bold">{booking?.customerName || "-"}</p>
                 </div>
               </div>
@@ -58,7 +67,7 @@ export default function BookingSuccess() {
               <div className="flex gap-3">
                 <Wrench className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
                 <div>
-                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">Kendaraan & Layanan</p>
+                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">{t('booking.s.srv')}</p>
                   <p className="font-bold">{booking?.carBrand} {booking?.carModel}</p>
                   <p className="text-sm text-[var(--color-text-secondary)]">{booking?.serviceType || "-"}</p>
                 </div>
@@ -67,16 +76,16 @@ export default function BookingSuccess() {
               <div className="flex gap-3">
                 <Calendar className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
                 <div>
-                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">Jadwal Kedatangan</p>
+                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">{t('booking.s.schedule')}</p>
                   <p className="font-bold">{booking?.bookingDate || "-"}</p>
-                  <p className="text-sm text-[var(--color-text-secondary)]">Jam: {booking?.bookingTime || "-"}</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">{t('booking.s.time')} {booking?.bookingTime || "-"}</p>
                 </div>
               </div>
 
               <div className="flex gap-3">
                 <MapPin className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
                 <div>
-                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">Lokasi Bengkel</p>
+                  <p className="text-xs text-[var(--color-text-secondary)] uppercase">{t('booking.s.location')}</p>
                   <p className="font-bold">{settings?.workshopName || "Bengkel"}</p>
                   <p className="text-sm text-[var(--color-text-secondary)] line-clamp-1">{settings?.address || "-"}</p>
                 </div>
@@ -86,21 +95,21 @@ export default function BookingSuccess() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <a href={waLink} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 bg-[#25D366] text-black font-bold py-3 px-4 rounded hover:bg-[#20b858] transition-colors">
-              <MessageCircle className="w-5 h-5" /> Konfirmasi via WhatsApp
+              <MessageCircle className="w-5 h-5" /> {t('booking.s.wa')}
             </a>
             <button onClick={handleSave} className="flex items-center justify-center gap-2 bg-[var(--color-background)] border border-[var(--color-border-subtle)] text-white font-bold py-3 px-4 rounded hover:bg-white/5 transition-colors">
-              <Download className="w-5 h-5" /> Simpan Detail Booking
+              <Download className="w-5 h-5" /> {t('booking.s.save')}
             </button>
             <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 bg-[var(--color-background)] border border-[var(--color-border-subtle)] text-white font-bold py-3 px-4 rounded hover:bg-white/5 transition-colors">
-              <MapPin className="w-5 h-5" /> Lihat Lokasi
+              <MapPin className="w-5 h-5" /> {t('booking.s.map')}
             </a>
             <Link to="/booking" className="flex items-center justify-center gap-2 bg-[var(--color-background)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] font-bold py-3 px-4 rounded hover:bg-white/5 transition-colors">
-              <RotateCcw className="w-5 h-5" /> Buat Booking Baru
+              <RotateCcw className="w-5 h-5" /> {t('booking.s.new')}
             </Link>
           </div>
 
           <div className="mt-8 text-center print:hidden">
-            <Link to="/home" className="text-sm text-[var(--color-primary)] hover:underline">Kembali ke Beranda</Link>
+            <Link to="/home" className="text-sm text-[var(--color-primary)] hover:underline">{t('booking.s.home')}</Link>
           </div>
         </div>
       </div>

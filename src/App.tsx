@@ -4,6 +4,7 @@
  */
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { LanguageProvider } from "./lib/i18n/LanguageContext";
 import Portal from "./pages/public/Portal";
 import Landing from "./pages/public/Landing";
 import BookingForm from "./pages/public/BookingForm";
@@ -22,28 +23,30 @@ import Promotions from "./pages/admin/Promotions";
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Portal />} />
-        <Route path="/home" element={<Landing />} />
-        <Route path="/booking" element={<BookingForm />} />
-        <Route path="/booking/success" element={<BookingSuccess />} />
-        
-        <Route path="/admin/login" element={<Login />} />
-        
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="bookings/today" element={<BookingsToday />} />
-          <Route path="bookings/new" element={<ManualBooking />} />
-          <Route path="bookings/:id" element={<BookingDetail />} />
-          <Route path="calendar" element={<Calendar />} />
-          <Route path="services" element={<Services />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="promotions" element={<Promotions />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-      </Routes>
-    </Router>
+    <LanguageProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Portal />} />
+          <Route path="/home" element={<Landing />} />
+          <Route path="/booking" element={<BookingForm />} />
+          <Route path="/booking/success" element={<BookingSuccess />} />
+          
+          <Route path="/admin/login" element={<Login />} />
+          
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="bookings/today" element={<BookingsToday />} />
+            <Route path="bookings/new" element={<ManualBooking />} />
+            <Route path="bookings/:id" element={<BookingDetail />} />
+            <Route path="calendar" element={<Calendar />} />
+            <Route path="services" element={<Services />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="promotions" element={<Promotions />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </Routes>
+      </Router>
+    </LanguageProvider>
   );
 }

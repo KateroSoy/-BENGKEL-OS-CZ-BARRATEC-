@@ -1,11 +1,30 @@
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowRight, Wrench, User } from "lucide-react";
+import { useTranslation } from "../../lib/i18n/LanguageContext";
 
 export default function Portal() {
+  const { t, language, setLanguage } = useTranslation();
+
   return (
-    <div className="min-h-screen flex flex-col md:flex-row font-sans overflow-hidden">
+    <div className="min-h-screen flex flex-col md:flex-row font-sans overflow-hidden relative">
       
+      {/* Floating Language Switcher */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 flex items-center bg-white/20 backdrop-blur-xl border border-black/10 rounded-full p-1 shadow-sm">
+        <button 
+          onClick={() => setLanguage('en')}
+          className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${language === 'en' ? 'bg-black text-white' : 'text-black hover:bg-black/5'}`}
+        >
+          EN
+        </button>
+        <button 
+          onClick={() => setLanguage('id')}
+          className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${language === 'id' ? 'bg-black text-white' : 'text-black hover:bg-black/5'}`}
+        >
+          ID
+        </button>
+      </div>
+
       {/* Customer Side */}
       <div className="w-full md:w-1/2 h-[50vh] md:h-screen bg-white flex flex-col items-center justify-center p-8 relative group">
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
@@ -13,10 +32,10 @@ export default function Portal() {
           <div className="w-20 h-20 mb-8 border border-black/10 flex items-center justify-center rounded-full group-hover:scale-110 transition-transform duration-500 bg-white">
             <User className="w-8 h-8 text-black" />
           </div>
-          <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter text-black mb-4">Saya Pelanggan</h2>
-          <p className="text-gray-500 font-medium mb-10 max-w-sm">Booking servis kendaraan Anda dengan mudah, cepat, dan transparan tanpa perlu antre panjang.</p>
+          <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter text-black mb-4">{t('portal.customer.title')}</h2>
+          <p className="text-gray-500 font-medium mb-10 max-w-sm">{t('portal.customer.desc')}</p>
           <Link to="/home" className="bg-black text-white px-10 py-4 font-bold text-sm uppercase tracking-widest hover:bg-gray-800 transition-colors flex items-center gap-4">
-            Masuk <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+            {t('portal.customer.btn')} <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
           </Link>
         </motion.div>
       </div>
@@ -28,10 +47,10 @@ export default function Portal() {
           <div className="w-20 h-20 mb-8 border border-white/20 flex items-center justify-center rounded-full group-hover:scale-110 transition-transform duration-500 bg-black/50 backdrop-blur-md">
             <Wrench className="w-8 h-8 text-white" />
           </div>
-          <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter text-white mb-4">Workspace Admin</h2>
-          <p className="text-gray-400 font-medium mb-10 max-w-sm">Kelola jadwal booking, laporan keuangan, dan operasional bengkel dalam satu dashboard pintar.</p>
+          <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter text-white mb-4">{t('portal.admin.title')}</h2>
+          <p className="text-gray-400 font-medium mb-10 max-w-sm">{t('portal.admin.desc')}</p>
           <Link to="/admin/login" className="bg-white text-black px-10 py-4 font-bold text-sm uppercase tracking-widest hover:bg-gray-200 transition-colors flex items-center gap-4">
-            Masuk <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+            {t('portal.admin.btn')} <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
           </Link>
         </motion.div>
       </div>

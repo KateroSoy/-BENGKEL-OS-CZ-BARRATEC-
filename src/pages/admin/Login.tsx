@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { ShieldCheck, ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
 import { login } from "../../lib/mockApi";
+import { useTranslation } from "../../lib/i18n/LanguageContext";
 
 export default function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,6 +27,8 @@ export default function Login() {
     setLoading(false);
   };
 
+  const footerText = (t('login.footer') as string).replace('{{year}}', new Date().getFullYear().toString());
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] py-12 px-4 sm:px-6 lg:px-8 font-sans relative overflow-hidden">
       {/* Background Orbs */}
@@ -43,8 +47,8 @@ export default function Login() {
                 <ShieldCheck className="w-8 h-8" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Admin BENGKEL OS CZ-BARRATEC</h2>
-            <p className="text-slate-500 text-sm font-medium mt-1">Masuk ke ruang kerja Anda</p>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">{t('login.title')}</h2>
+            <p className="text-slate-500 text-sm font-medium mt-1">{t('login.subtitle')}</p>
           </div>
           <div className="px-8 pb-10">
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -54,7 +58,7 @@ export default function Login() {
                 </div>
               )}
               <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700 ml-1">Email Admin</label>
+                <label className="text-sm font-medium text-slate-700 ml-1">{t('login.email')}</label>
                 <input
                   id="email"
                   name="email"
@@ -66,7 +70,7 @@ export default function Login() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700 ml-1">Password</label>
+                <label className="text-sm font-medium text-slate-700 ml-1">{t('login.pass')}</label>
                 <input
                   id="password"
                   name="password"
@@ -83,8 +87,8 @@ export default function Login() {
                   disabled={loading}
                   className="w-full bg-slate-900 text-white py-3 px-4 rounded-xl font-medium hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/20 transition-all shadow-md flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Mengautentikasi...' : (
-                    <>Masuk <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
+                  {loading ? t('login.loading') : (
+                    <>{t('login.btn')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
                   )}
                 </button>
               </div>
@@ -92,9 +96,7 @@ export default function Login() {
           </div>
         </div>
         
-        <p className="text-center text-sm text-slate-500 mt-8 font-medium">
-          &copy; {new Date().getFullYear()} BENGKEL OS CZ-BARRATEC. Hak cipta dilindungi.
-        </p>
+        <p className="text-center text-sm text-slate-500 mt-8 font-medium" dangerouslySetInnerHTML={{ __html: footerText }} />
       </motion.div>
     </div>
   );

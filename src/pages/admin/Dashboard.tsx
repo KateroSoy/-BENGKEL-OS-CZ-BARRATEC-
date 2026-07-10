@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { Calendar, CheckCircle2, Clock, FileText, PlusCircle, Wrench, ArrowRight, Activity, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 import { getDashboardStats } from "../../lib/mockApi";
+import { useTranslation } from "../../lib/i18n/LanguageContext";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
@@ -21,39 +23,39 @@ export default function Dashboard() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
         <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <p className="text-slate-500 font-medium">Memuat dashboard...</p>
+        <p className="text-slate-500 font-medium">{t('dash.loading')}</p>
       </div>
     );
   }
 
   const kpiData = [
     {
-      title: "Total Hari Ini",
+      title: t('dash.kpi.today'),
       value: stats.todayTotal,
       icon: FileText,
       color: "blue",
-      trend: "+12% dari kemarin"
+      trend: t('dash.kpi.trend.today')
     },
     {
-      title: "Menunggu",
+      title: t('dash.kpi.waiting'),
       value: getStatusCount("Baru") + getStatusCount("Menunggu Konfirmasi"),
       icon: Clock,
       color: "amber",
-      trend: "Butuh tindakan"
+      trend: t('dash.kpi.trend.wait')
     },
     {
-      title: "Dikerjakan",
+      title: t('dash.kpi.progress'),
       value: getStatusCount("Sedang Dikerjakan"),
       icon: Wrench,
       color: "indigo",
-      trend: "Sedang berjalan"
+      trend: t('dash.kpi.trend.prog')
     },
     {
-      title: "Selesai",
+      title: t('dash.kpi.done'),
       value: getStatusCount("Selesai"),
       icon: CheckCircle2,
       color: "emerald",
-      trend: "Siap diambil"
+      trend: t('dash.kpi.trend.done')
     }
   ];
 
@@ -66,9 +68,9 @@ export default function Dashboard() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Ringkasan</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{t('dash.title')}</h1>
           <p className="text-slate-500 mt-1.5 text-sm font-medium flex items-center">
-            <Activity className="w-4 h-4 mr-2" /> Metrik operasional langsung
+            <Activity className="w-4 h-4 mr-2" /> {t('dash.subtitle')}
           </p>
         </motion.div>
         
@@ -80,7 +82,7 @@ export default function Dashboard() {
           <Link to="/admin/bookings/new" className="flex-1 sm:flex-none">
             <button className="w-full bg-slate-900 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-slate-800 transition-all shadow-md flex items-center justify-center gap-2 group">
               <PlusCircle className="w-4 h-4 group-hover:scale-110 transition-transform" /> 
-              Booking Baru
+              {t('dash.newBtn')}
             </button>
           </Link>
         </motion.div>
@@ -90,7 +92,7 @@ export default function Dashboard() {
       <div id="tour-stats" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiData.map((item, index) => (
           <motion.div
-            key={item.title}
+            key={item.title as string}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -102,7 +104,7 @@ export default function Dashboard() {
               </div>
               <div className={`flex items-center text-xs font-semibold px-2 py-1 bg-slate-50 text-slate-500 rounded-lg`}>
                 <TrendingUp className="w-3 h-3 mr-1" />
-                {item.trend.split(' ')[0]}
+                {(item.trend as string).split(' ')[0]}
               </div>
             </div>
             
@@ -123,7 +125,7 @@ export default function Dashboard() {
       >
         <div id="tour-quick-actions" className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-            <h3 className="text-lg font-bold text-slate-900">Aksi Cepat</h3>
+            <h3 className="text-lg font-bold text-slate-900">{t('dash.action.title')}</h3>
           </div>
           <div className="p-6 grid sm:grid-cols-2 gap-4 flex-1 bg-gradient-to-br from-white to-slate-50/50">
             <Link to="/admin/bookings/today" className="group">
@@ -132,11 +134,11 @@ export default function Dashboard() {
                   <Calendar className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 mb-1">Jadwal & Kalender</h4>
-                  <p className="text-sm text-slate-500">Lihat dan kelola jadwal servis hari ini.</p>
+                  <h4 className="font-bold text-slate-900 mb-1">{t('dash.action.cal')}</h4>
+                  <p className="text-sm text-slate-500">{t('dash.action.cal.desc')}</p>
                 </div>
                 <div className="mt-auto pt-4 text-sm font-semibold text-blue-600 flex items-center">
-                  Buka Kalender <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  {t('dash.action.cal.btn')} <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </Link>
@@ -147,11 +149,11 @@ export default function Dashboard() {
                   <Wrench className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 mb-1">Layanan & Teknisi</h4>
-                  <p className="text-sm text-slate-500">Konfigurasi data master untuk layanan, harga, dan staf.</p>
+                  <h4 className="font-bold text-slate-900 mb-1">{t('dash.action.srv')}</h4>
+                  <p className="text-sm text-slate-500">{t('dash.action.srv.desc')}</p>
                 </div>
                 <div className="mt-auto pt-4 text-sm font-semibold text-indigo-600 flex items-center">
-                  Kelola Layanan <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  {t('dash.action.srv.btn')} <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </Link>
@@ -165,9 +167,9 @@ export default function Dashboard() {
             <div className="w-16 h-16 bg-slate-800 border border-slate-700 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
               <Activity className="w-8 h-8 text-slate-400" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Aktivitas Terkini</h3>
+            <h3 className="text-xl font-bold text-white mb-2">{t('dash.activity.title')}</h3>
             <p className="text-sm text-slate-400 max-w-[200px] mx-auto">
-              Pembaruan langsung akan muncul di sini saat bengkel mulai beroperasi.
+              {t('dash.activity.desc')}
             </p>
           </div>
         </div>

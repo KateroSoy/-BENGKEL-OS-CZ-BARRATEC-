@@ -4,8 +4,10 @@ import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, Input, Label, Select, Textarea, Button } from "../../components/ui/core";
 import { ArrowLeft } from "lucide-react";
 import { createBooking, getActiveServices, getSettings, getActivePromos } from "../../lib/mockApi";
+import { useTranslation } from "../../lib/i18n/LanguageContext";
 
 export default function ManualBooking() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState<any[]>([]);
@@ -23,11 +25,9 @@ export default function ManualBooking() {
     setLoading(true);
     const fd = new FormData(e.currentTarget);
     const data = Object.fromEntries(fd.entries()) as any;
-
     if (data.problemCategory) {
       data.problemDescription = `${data.problemCategory}${data.problemDescription ? ' - ' + data.problemDescription : ''}`;
     }
-
     const { id } = createBooking(data);
     setLoading(false);
     navigate(`/admin/bookings/${id}`);
@@ -40,18 +40,17 @@ export default function ManualBooking() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tambah Booking Manual</h1>
-          <p className="text-gray-500 mt-1">Input data booking dari WhatsApp atau Walk-in</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('mb.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('mb.subtitle')}</p>
         </div>
       </div>
 
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="source">Sumber Booking</Label>
+                <Label htmlFor="source">{t('mb.source')}</Label>
                 <Select id="source" name="source" required defaultValue="WhatsApp">
                   <option value="WhatsApp">WhatsApp</option>
                   <option value="Telepon">Telepon</option>
@@ -60,7 +59,7 @@ export default function ManualBooking() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="status">Status Awal</Label>
+                <Label htmlFor="status">{t('mb.status')}</Label>
                 <Select id="status" name="status" required defaultValue="Terkonfirmasi">
                   <option value="Baru">Baru</option>
                   <option value="Terkonfirmasi">Terkonfirmasi</option>
@@ -72,49 +71,49 @@ export default function ManualBooking() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-100 pt-6">
               <div className="space-y-2">
-                <Label htmlFor="customerName">Nama Konsumen *</Label>
+                <Label htmlFor="customerName">{t('mb.customer')}</Label>
                 <Input id="customerName" name="customerName" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customerPhone">No. WhatsApp *</Label>
+                <Label htmlFor="customerPhone">{t('mb.phone')}</Label>
                 <Input id="customerPhone" name="customerPhone" required type="tel" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="bookingDate">Tanggal *</Label>
+                <Label htmlFor="bookingDate">{t('mb.date')}</Label>
                 <Input id="bookingDate" name="bookingDate" type="date" required defaultValue={format(new Date(), "yyyy-MM-dd")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="bookingTime">Jam *</Label>
+                <Label htmlFor="bookingTime">{t('mb.time')}</Label>
                 <Input id="bookingTime" name="bookingTime" type="time" required defaultValue="09:00" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-100 pt-6">
               <div className="space-y-2">
-                <Label htmlFor="carType">Tipe Mobil *</Label>
+                <Label htmlFor="carType">{t('mb.cartype')}</Label>
                 <Select id="carType" name="carType" required defaultValue="">
-                  <option value="" disabled>Pilih tipe mobil</option>
+                  <option value="" disabled>{t('mb.cartype.ph')}</option>
                   {settings?.carTypes?.map((ct: string, i: number) => (
                     <option key={i} value={ct}>{ct}</option>
                   ))}
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="plateNumber">Plat Nomor</Label>
+                <Label htmlFor="plateNumber">{t('mb.plate')}</Label>
                 <Input id="plateNumber" name="plateNumber" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="serviceType">Jenis Layanan *</Label>
+                <Label htmlFor="serviceType">{t('mb.service')}</Label>
                 <Select id="serviceType" name="serviceType" required defaultValue="">
-                  <option value="" disabled>Pilih layanan</option>
+                  <option value="" disabled>{t('mb.service.ph')}</option>
                   {promos.length > 0 && (
-                    <optgroup label="Promo Spesial">
+                    <optgroup label={t('mb.promo.grp') as string}>
                       {promos.map(p => (
                         <option key={p.id} value={`[PROMO] ${p.name}`}>[PROMO] {p.name}</option>
                       ))}
                     </optgroup>
                   )}
-                  <optgroup label="Layanan Reguler">
+                  <optgroup label={t('mb.regular.grp') as string}>
                     {services.map(s => (
                       <option key={s.id} value={s.name}>{s.name}</option>
                     ))}
@@ -125,28 +124,28 @@ export default function ManualBooking() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="problemCategory">Kategori Keluhan / Problem *</Label>
+                <Label htmlFor="problemCategory">{t('mb.prob')}</Label>
                 <Select id="problemCategory" name="problemCategory" required defaultValue="">
-                  <option value="" disabled>Pilih kategori keluhan</option>
+                  <option value="" disabled>{t('mb.prob.ph')}</option>
                   {settings?.problemOptions?.map((po: string, i: number) => (
                     <option key={i} value={po}>{po}</option>
                   ))}
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="problemDescription">Detail Keluhan Tambahan</Label>
-                <Textarea id="problemDescription" name="problemDescription" placeholder="Opsional" />
+                <Label htmlFor="problemDescription">{t('mb.probdesc')}</Label>
+                <Textarea id="problemDescription" name="problemDescription" placeholder="Optional" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="adminNote">Catatan Admin</Label>
-              <Textarea id="adminNote" name="adminNote" placeholder="Catatan internal (tidak dilihat konsumen)" />
+              <Label htmlFor="adminNote">{t('mb.note')}</Label>
+              <Textarea id="adminNote" name="adminNote" placeholder={t('mb.note.ph') as string} />
             </div>
 
             <div className="flex justify-end gap-3 border-t border-gray-100 pt-6">
-              <Button type="button" variant="ghost" onClick={() => navigate(-1)}>Batal</Button>
-              <Button type="submit" isLoading={loading}>Simpan Booking</Button>
+              <Button type="button" variant="ghost" onClick={() => navigate(-1)}>{t('mb.cancel')}</Button>
+              <Button type="submit" isLoading={loading}>{t('mb.save')}</Button>
             </div>
           </form>
         </CardContent>

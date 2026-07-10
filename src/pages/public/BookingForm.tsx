@@ -4,10 +4,12 @@ import { format } from "date-fns";
 import { ArrowLeft, ArrowRight, CheckCircle2, ListChecks, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { createPublicBooking, getActiveServices, getSettings, getSlotInfo } from "../../lib/mockApi";
+import { useTranslation } from "../../lib/i18n/LanguageContext";
 
 type FormMode = 'selection' | 'wizard' | 'single';
 
 export default function BookingForm() {
+  const { t, language, setLanguage } = useTranslation();
   const navigate = useNavigate();
   const [formMode, setFormMode] = useState<FormMode>('selection');
   const [step, setStep] = useState(1);
@@ -109,10 +111,10 @@ export default function BookingForm() {
       <div className="absolute top-1/2 left-0 w-full h-[2px] bg-[var(--color-border-subtle)] -z-10"></div>
       <div className="absolute top-1/2 left-0 h-[2px] bg-[var(--color-primary)] -z-10 transition-all duration-500" style={{ width: `${((step - 1) / 3) * 100}%` }}></div>
       {[
-        { n: 1, label: "Data Diri" },
-        { n: 2, label: "Kendaraan" },
-        { n: 3, label: "Keluhan" },
-        { n: 4, label: "Jadwal" }
+        { n: 1, label: t('booking.step1') },
+        { n: 2, label: t('booking.step2') },
+        { n: 3, label: t('booking.step3') },
+        { n: 4, label: t('booking.step4') }
       ].map((s) => (
         <div key={s.n} className="flex flex-col items-center gap-2">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all shadow-sm ${
@@ -122,7 +124,7 @@ export default function BookingForm() {
           }`}>
             {step > s.n ? <CheckCircle2 className="w-5 h-5" /> : s.n}
           </div>
-          <span className={`text-xs font-bold uppercase tracking-wide ${step >= s.n ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'} hidden sm:block`}>{s.label}</span>
+          <span className={`text-xs font-bold uppercase tracking-wide ${step >= s.n ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'} hidden sm:block`}>{s.label as string}</span>
         </div>
       ))}
     </div>
@@ -132,28 +134,28 @@ export default function BookingForm() {
   const Step1Fields = () => (
     <div className="space-y-6">
       <div className="mb-8">
-        <h2 className="font-display text-2xl font-bold uppercase mb-2 text-[var(--color-text-primary)]">01. Data Pelanggan</h2>
-        <p className="text-[var(--color-text-secondary)] text-sm font-medium">Informasi untuk menghubungi Anda terkait jadwal servis.</p>
+        <h2 className="font-display text-2xl font-bold uppercase mb-2 text-[var(--color-text-primary)]">{t('booking.f.step1.title')}</h2>
+        <p className="text-[var(--color-text-secondary)] text-sm font-medium">{t('booking.f.step1.desc')}</p>
       </div>
       <div className="space-y-6">
         <div>
-          <label className={labelClass}>Nama Lengkap *</label>
-          <input type="text" name="customerName" required value={formData.customerName} onChange={handleChange} className={inputClass} placeholder="Contoh: Budi Santoso" autoFocus />
+          <label className={labelClass}>{t('booking.f.name')}</label>
+          <input type="text" name="customerName" required value={formData.customerName} onChange={handleChange} className={inputClass} placeholder={t('booking.f.name.ph') as string} autoFocus />
         </div>
         <div>
-          <label className={labelClass}>Nomor WhatsApp *</label>
+          <label className={labelClass}>{t('booking.f.phone')}</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] font-bold">+62</span>
             <input type="tel" name="customerPhone" required value={formData.customerPhone} onChange={handleChange} className={`${inputClass} pl-14`} placeholder="81234567890" />
           </div>
         </div>
         <div>
-          <label className={labelClass}>Status Pelanggan</label>
+          <label className={labelClass}>{t('booking.f.status')}</label>
           <div className="flex gap-4">
-            {['Pelanggan baru', 'Pernah servis'].map(opt => (
-              <label key={opt} className={`flex-1 flex items-center justify-center p-3 rounded-lg border cursor-pointer transition-colors shadow-sm ${formData.customerType === opt ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]' : 'bg-white border-[var(--color-border-subtle)] hover:bg-gray-50 text-[var(--color-text-primary)]'}`}>
-                <input type="radio" name="customerType" value={opt} checked={formData.customerType === opt} onChange={handleChange} className="hidden" />
-                <span className="font-bold text-sm">{opt}</span>
+            {[t('booking.f.status.new'), t('booking.f.status.exist')].map(opt => (
+              <label key={opt as string} className={`flex-1 flex items-center justify-center p-3 rounded-lg border cursor-pointer transition-colors shadow-sm ${formData.customerType === opt ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]' : 'bg-white border-[var(--color-border-subtle)] hover:bg-gray-50 text-[var(--color-text-primary)]'}`}>
+                <input type="radio" name="customerType" value={opt as string} checked={formData.customerType === opt} onChange={handleChange} className="hidden" />
+                <span className="font-bold text-sm">{opt as string}</span>
               </label>
             ))}
           </div>
@@ -165,14 +167,14 @@ export default function BookingForm() {
   const Step2Fields = () => (
     <div className="space-y-6">
       <div className="mb-8">
-        <h2 className="font-display text-2xl font-bold uppercase mb-2 text-[var(--color-text-primary)]">02. Data Kendaraan</h2>
-        <p className="text-[var(--color-text-secondary)] text-sm font-medium">Informasi kendaraan untuk menyiapkan suku cadang yang tepat.</p>
+        <h2 className="font-display text-2xl font-bold uppercase mb-2 text-[var(--color-text-primary)]">{t('booking.f.step2.title')}</h2>
+        <p className="text-[var(--color-text-secondary)] text-sm font-medium">{t('booking.f.step2.desc')}</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className={labelClass}>Merek *</label>
+          <label className={labelClass}>{t('booking.f.brand')}</label>
           <select name="carBrand" required value={formData.carBrand} onChange={handleChange} className={inputClass}>
-            <option value="">Pilih Merek...</option>
+            <option value="">{t('booking.f.brand.ph')}</option>
             <option value="Toyota">Toyota</option>
             <option value="Honda">Honda</option>
             <option value="Suzuki">Suzuki</option>
@@ -181,24 +183,24 @@ export default function BookingForm() {
           </select>
         </div>
         <div>
-          <label className={labelClass}>Model / Tipe *</label>
-          <input type="text" name="carModel" required value={formData.carModel} onChange={handleChange} className={inputClass} placeholder="Contoh: Avanza" />
+          <label className={labelClass}>{t('booking.f.model')}</label>
+          <input type="text" name="carModel" required value={formData.carModel} onChange={handleChange} className={inputClass} placeholder={t('booking.f.model.ph') as string} />
         </div>
         <div>
-          <label className={labelClass}>Tahun</label>
-          <input type="number" name="carYear" value={formData.carYear} onChange={handleChange} className={inputClass} placeholder="Contoh: 2018" />
+          <label className={labelClass}>{t('booking.f.year')}</label>
+          <input type="number" name="carYear" value={formData.carYear} onChange={handleChange} className={inputClass} placeholder="2018" />
         </div>
         <div>
-          <label className={labelClass}>Nomor Polisi</label>
-          <input type="text" name="plateNumber" value={formData.plateNumber} onChange={handleChange} className={inputClass} placeholder="Contoh: B 1234 XYZ" />
+          <label className={labelClass}>{t('booking.f.plate')}</label>
+          <input type="text" name="plateNumber" value={formData.plateNumber} onChange={handleChange} className={inputClass} placeholder="B 1234 XYZ" />
         </div>
         <div className="md:col-span-2">
-          <label className={labelClass}>Transmisi</label>
+          <label className={labelClass}>{t('booking.f.trans')}</label>
           <div className="flex gap-4">
-            {['Otomatis', 'Manual'].map(opt => (
-              <label key={opt} className={`flex-1 flex items-center justify-center p-3 rounded-lg border cursor-pointer transition-colors shadow-sm ${formData.transmission === opt ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]' : 'bg-white border-[var(--color-border-subtle)] hover:bg-gray-50 text-[var(--color-text-primary)]'}`}>
-                <input type="radio" name="transmission" value={opt} checked={formData.transmission === opt} onChange={handleChange} className="hidden" />
-                <span className="font-bold text-sm">{opt}</span>
+            {[t('booking.f.trans.auto'), t('booking.f.trans.man')].map(opt => (
+              <label key={opt as string} className={`flex-1 flex items-center justify-center p-3 rounded-lg border cursor-pointer transition-colors shadow-sm ${formData.transmission === opt ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]' : 'bg-white border-[var(--color-border-subtle)] hover:bg-gray-50 text-[var(--color-text-primary)]'}`}>
+                <input type="radio" name="transmission" value={opt as string} checked={formData.transmission === opt} onChange={handleChange} className="hidden" />
+                <span className="font-bold text-sm">{opt as string}</span>
               </label>
             ))}
           </div>
@@ -210,47 +212,47 @@ export default function BookingForm() {
   const Step3Fields = () => (
     <div className="space-y-6">
       <div className="mb-8">
-        <h2 className="font-display text-2xl font-bold uppercase mb-2 text-[var(--color-text-primary)]">03. Kebutuhan Servis</h2>
-        <p className="text-[var(--color-text-secondary)] text-sm font-medium">Pilih jenis servis dan jelaskan keluhan yang Anda rasakan.</p>
+        <h2 className="font-display text-2xl font-bold uppercase mb-2 text-[var(--color-text-primary)]">{t('booking.f.step3.title')}</h2>
+        <p className="text-[var(--color-text-secondary)] text-sm font-medium">{t('booking.f.step3.desc')}</p>
       </div>
       <div className="space-y-6">
         <div>
-          <label className={labelClass}>Jenis Layanan *</label>
+          <label className={labelClass}>{t('booking.f.srv')}</label>
           <select name="serviceType" required value={formData.serviceType} onChange={handleChange} className={inputClass}>
-            <option value="">Pilih Jenis Layanan...</option>
+            <option value="">{t('booking.f.srv.ph')}</option>
             {services.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
           </select>
         </div>
         <div>
-          <label className={labelClass}>Kategori Masalah *</label>
+          <label className={labelClass}>{t('booking.f.prob')}</label>
           <select name="problemCategory" required value={formData.problemCategory} onChange={handleChange} className={inputClass}>
-            <option value="">Pilih Kategori...</option>
+            <option value="">{t('booking.f.prob.ph')}</option>
             {settings.problemOptions?.map((p:string) => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
         <div>
-          <label className={labelClass}>Detail Keluhan</label>
-          <textarea name="problemDescription" rows={3} value={formData.problemDescription} onChange={handleChange} className={inputClass} placeholder="Ceritakan gejala atau suara aneh yang muncul..."></textarea>
+          <label className={labelClass}>{t('booking.f.desc')}</label>
+          <textarea name="problemDescription" rows={3} value={formData.problemDescription} onChange={handleChange} className={inputClass} placeholder={t('booking.f.desc.ph') as string}></textarea>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className={labelClass}>Masih bisa dikendarai?</label>
+            <label className={labelClass}>{t('booking.f.drive')}</label>
             <div className="flex gap-4">
-              {['Ya', 'Tidak'].map(opt => (
-                <label key={opt} className={`flex-1 flex items-center justify-center p-3 rounded-lg border cursor-pointer transition-colors shadow-sm ${formData.isDrivable === opt ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]' : 'bg-white border-[var(--color-border-subtle)] hover:bg-gray-50 text-[var(--color-text-primary)]'}`}>
-                  <input type="radio" name="isDrivable" value={opt} checked={formData.isDrivable === opt} onChange={handleChange} className="hidden" />
-                  <span className="font-bold text-sm">{opt}</span>
+              {[t('booking.f.drive.yes'), t('booking.f.drive.no')].map(opt => (
+                <label key={opt as string} className={`flex-1 flex items-center justify-center p-3 rounded-lg border cursor-pointer transition-colors shadow-sm ${formData.isDrivable === opt ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]' : 'bg-white border-[var(--color-border-subtle)] hover:bg-gray-50 text-[var(--color-text-primary)]'}`}>
+                  <input type="radio" name="isDrivable" value={opt as string} checked={formData.isDrivable === opt} onChange={handleChange} className="hidden" />
+                  <span className="font-bold text-sm">{opt as string}</span>
                 </label>
               ))}
             </div>
           </div>
           <div>
-            <label className={labelClass}>Layanan Tambahan</label>
+            <label className={labelClass}>{t('booking.f.add')}</label>
             <select name="additionalService" value={formData.additionalService} onChange={handleChange} className={inputClass}>
-              <option value="Tunggu di bengkel">Tunggu di bengkel</option>
-              <option value="Tinggal kendaraan">Tinggal kendaraan</option>
-              <option value="Jemput kendaraan">Jemput kendaraan</option>
-              <option value="Antar kendaraan">Antar kendaraan</option>
+              <option value="Tunggu di bengkel">Tunggu di bengkel / Wait</option>
+              <option value="Tinggal kendaraan">Tinggal kendaraan / Leave</option>
+              <option value="Jemput kendaraan">Jemput kendaraan / Pickup</option>
+              <option value="Antar kendaraan">Antar kendaraan / Delivery</option>
             </select>
           </div>
         </div>
@@ -261,39 +263,39 @@ export default function BookingForm() {
   const Step4Fields = () => (
     <div className="space-y-6">
       <div className="mb-8">
-        <h2 className="font-display text-2xl font-bold uppercase mb-2 text-[var(--color-text-primary)]">04. Jadwal & Konfirmasi</h2>
-        <p className="text-[var(--color-text-secondary)] text-sm font-medium">Pilih waktu yang tersedia dan periksa kembali detail booking Anda.</p>
+        <h2 className="font-display text-2xl font-bold uppercase mb-2 text-[var(--color-text-primary)]">{t('booking.f.step4.title')}</h2>
+        <p className="text-[var(--color-text-secondary)] text-sm font-medium">{t('booking.f.step4.desc')}</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className={labelClass}>Tanggal *</label>
+          <label className={labelClass}>{t('booking.f.date')}</label>
           <input type="date" name="bookingDate" required value={formData.bookingDate} onChange={handleChange} min={format(new Date(), "yyyy-MM-dd")} className={inputClass} />
         </div>
         <div>
-          <label className={labelClass}>Waktu *</label>
+          <label className={labelClass}>{t('booking.f.time')}</label>
           <select name="bookingTime" required value={formData.bookingTime} onChange={handleChange} className={inputClass}>
-            <option value="">Pilih Waktu...</option>
+            <option value="">{t('booking.f.time.ph')}</option>
             {availableSlots.map(slot => (
               <option key={slot.time} value={slot.time} disabled={slot.isFull}>
-                {slot.time} {slot.isFull ? "(Penuh)" : ""}
+                {slot.time} {slot.isFull ? "(Penuh/Full)" : ""}
               </option>
             ))}
           </select>
         </div>
       </div>
       <div className="mt-8 pt-8 border-t border-[var(--color-border-subtle)]">
-        <h3 className="font-bold text-lg mb-4 text-[var(--color-text-primary)]">Ringkasan Booking</h3>
+        <h3 className="font-bold text-lg mb-4 text-[var(--color-text-primary)]">{t('booking.f.summary')}</h3>
         <div className="bg-[var(--color-background)] p-5 rounded-lg border border-[var(--color-border-subtle)] space-y-4 text-sm shadow-inner">
           <div className="flex justify-between border-b border-[var(--color-border-subtle)] pb-2">
-            <span className="text-[var(--color-text-secondary)] font-medium">Pemilik</span>
+            <span className="text-[var(--color-text-secondary)] font-medium">{t('booking.f.owner')}</span>
             <span className="font-bold text-[var(--color-text-primary)]">{formData.customerName || "-"}</span>
           </div>
           <div className="flex justify-between border-b border-[var(--color-border-subtle)] pb-2">
-            <span className="text-[var(--color-text-secondary)] font-medium">Kendaraan</span>
+            <span className="text-[var(--color-text-secondary)] font-medium">{t('booking.f.vehicle')}</span>
             <span className="font-bold text-[var(--color-text-primary)]">{formData.carBrand} {formData.carModel} ({formData.plateNumber || "-"})</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-[var(--color-text-secondary)] font-medium">Layanan</span>
+            <span className="text-[var(--color-text-secondary)] font-medium">{t('booking.f.service')}</span>
             <span className="font-bold text-[var(--color-text-primary)]">{formData.serviceType || "-"}</span>
           </div>
         </div>
@@ -307,13 +309,17 @@ export default function BookingForm() {
       {/* Header */}
       <div className="bg-white border-b border-[var(--color-border-subtle)] px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
         <Link to="/home" className="flex items-center gap-2 hover:text-[var(--color-primary)] transition-colors text-[var(--color-text-secondary)]">
-          <ArrowLeft className="w-5 h-5" /> <span className="font-bold hidden sm:inline">Kembali</span>
+          <ArrowLeft className="w-5 h-5" /> <span className="font-bold hidden sm:inline">{t('booking.back')}</span>
         </Link>
         <span className="font-display font-bold text-xl uppercase tracking-widest text-center flex-1">{settings.workshopName}</span>
-        <div className="w-[80px]">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center bg-gray-100 rounded-md p-0.5">
+            <button onClick={() => setLanguage('en')} className={`px-2.5 py-1 text-[10px] font-bold uppercase transition-all rounded-sm ${language === 'en' ? 'bg-black text-white shadow-sm' : 'text-gray-500 hover:text-black'}`}>EN</button>
+            <button onClick={() => setLanguage('id')} className={`px-2.5 py-1 text-[10px] font-bold uppercase transition-all rounded-sm ${language === 'id' ? 'bg-black text-white shadow-sm' : 'text-gray-500 hover:text-black'}`}>ID</button>
+          </div>
           {formMode !== 'selection' && (
-            <button onClick={() => setFormMode('selection')} className="text-xs font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] uppercase tracking-wider underline">
-              Ubah Mode
+            <button onClick={() => setFormMode('selection')} className="text-xs font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] uppercase tracking-wider underline hidden sm:inline">
+              {t('booking.mode.btn')}
             </button>
           )}
         </div>
@@ -323,8 +329,8 @@ export default function BookingForm() {
         {formMode === 'selection' ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
             <div className="text-center">
-              <h1 className="font-display text-4xl font-bold uppercase mb-4 text-[var(--color-text-primary)]">Pilih Cara Booking</h1>
-              <p className="text-[var(--color-text-secondary)] text-lg font-medium">Sesuaikan dengan kenyamanan Anda dalam mengisi formulir pendaftaran.</p>
+              <h1 className="font-display text-4xl font-bold uppercase mb-4 text-[var(--color-text-primary)]">{t('booking.mode.btn')}</h1>
+              <p className="text-[var(--color-text-secondary)] text-lg font-medium">{t('booking.mode.desc')}</p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-6">
@@ -335,8 +341,8 @@ export default function BookingForm() {
                 <div className="w-20 h-20 rounded-full bg-[var(--color-background)] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <ListChecks className="w-10 h-10 text-[var(--color-primary)]" />
                 </div>
-                <h3 className="font-display text-2xl font-bold uppercase mb-3 text-[var(--color-text-primary)]">Step-by-Step</h3>
-                <p className="text-[var(--color-text-secondary)] font-medium leading-relaxed">Panduan pengisian bertahap (4 Langkah). Cocok untuk pengguna baru agar lebih fokus.</p>
+                <h3 className="font-display text-2xl font-bold uppercase mb-3 text-[var(--color-text-primary)]">{t('booking.mode.wizard')}</h3>
+                <p className="text-[var(--color-text-secondary)] font-medium leading-relaxed">{t('booking.mode.wizard.desc')}</p>
               </button>
 
               <button 
@@ -346,8 +352,8 @@ export default function BookingForm() {
                 <div className="w-20 h-20 rounded-full bg-[var(--color-background)] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <FileText className="w-10 h-10 text-[var(--color-primary)]" />
                 </div>
-                <h3 className="font-display text-2xl font-bold uppercase mb-3 text-[var(--color-text-primary)]">Satu Halaman</h3>
-                <p className="text-[var(--color-text-secondary)] font-medium leading-relaxed">Semua formulir dalam satu halaman panjang. Cocok untuk pengisian cepat tanpa repot klik lanjut.</p>
+                <h3 className="font-display text-2xl font-bold uppercase mb-3 text-[var(--color-text-primary)]">{t('booking.mode.single')}</h3>
+                <p className="text-[var(--color-text-secondary)] font-medium leading-relaxed">{t('booking.mode.single.desc')}</p>
               </button>
             </div>
           </motion.div>
@@ -380,7 +386,7 @@ export default function BookingForm() {
               <div className="flex justify-between items-center mt-10 pt-8 border-t border-[var(--color-border-subtle)]">
                 {formMode === 'wizard' && step > 1 ? (
                   <button type="button" onClick={handlePrev} className="px-6 py-3 font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors">
-                    Kembali
+                    {t('booking.prev')}
                   </button>
                 ) : (
                   <div></div>
@@ -388,11 +394,11 @@ export default function BookingForm() {
                 
                 <button type="submit" disabled={loading} className="bg-[var(--color-primary)] text-white px-8 py-4 rounded font-bold hover:bg-[var(--color-primary-hover)] transition-all flex items-center gap-2 shadow-md">
                   {loading ? (
-                    <span className="animate-pulse">Memproses...</span>
+                    <span className="animate-pulse">Loading...</span>
                   ) : (formMode === 'wizard' && step < 4) ? (
-                    <>Lanjut <ArrowRight className="w-5 h-5" /></>
+                    <>{t('booking.next')} <ArrowRight className="w-5 h-5" /></>
                   ) : (
-                    <>Kirim Booking <CheckCircle2 className="w-5 h-5" /></>
+                    <>{t('booking.submit')} <CheckCircle2 className="w-5 h-5" /></>
                   )}
                 </button>
               </div>
