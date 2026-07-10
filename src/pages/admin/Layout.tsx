@@ -3,7 +3,7 @@ import { LayoutDashboard, Calendar as CalendarIcon, Users, Settings, LogOut, Wre
 import { cn } from "../../lib/utils";
 import { useState, useEffect } from "react";
 import { ProductTour } from "../../components/ProductTour";
-import { logout as mockLogout } from "../../lib/mockApi";
+import { logout as mockLogout, getSettings, Settings as WorkspaceSettings } from "../../lib/mockApi";
 import { useTranslation } from "../../lib/i18n/LanguageContext";
 
 const navigationBase = [
@@ -22,8 +22,10 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const { t, language, setLanguage } = useTranslation();
   const [showTour, setShowTour] = useState(false);
+  const [settings, setSettings] = useState<WorkspaceSettings | null>(null);
 
   useEffect(() => {
+    setSettings(getSettings());
     if (location.pathname === '/admin/dashboard') {
       const tourCompleted = localStorage.getItem('bw_tour_completed');
       if (!tourCompleted) {
@@ -52,10 +54,16 @@ export default function AdminLayout() {
       <div id="tour-sidebar" className="hidden md:flex md:w-[280px] md:flex-col border-r border-slate-200/60 bg-white/50 backdrop-blur-xl print:hidden z-20">
         <div className="flex flex-col flex-grow pt-8 pb-4 overflow-y-auto">
           <div className="flex items-center flex-shrink-0 px-8 mb-10">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-600/20 mr-3">
-              <Wrench className="h-5 w-5" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900">BENGKEL OS</span>
+            {settings?.logoUrl ? (
+              <img src={settings.logoUrl} alt="Logo" className="w-10 h-10 object-contain mr-3" />
+            ) : (
+              <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-600/20 mr-3">
+                <Wrench className="h-5 w-5" />
+              </div>
+            )}
+            <span className="text-lg font-bold tracking-tight text-slate-900 line-clamp-2 leading-tight">
+              {settings?.workshopName || "BENGKEL OS"}
+            </span>
           </div>
           <nav className="mt-2 flex-1 px-4 space-y-1.5">
             {navigationBase.map((item) => {

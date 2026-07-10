@@ -311,7 +311,16 @@ export default function BookingForm() {
         <Link to="/home" className="flex items-center gap-2 hover:text-[var(--color-primary)] transition-colors text-[var(--color-text-secondary)]">
           <ArrowLeft className="w-5 h-5" /> <span className="font-bold hidden sm:inline">{t('booking.back')}</span>
         </Link>
-        <span className="font-display font-bold text-xl uppercase tracking-widest text-center flex-1">{settings.workshopName}</span>
+        <div className="flex-1 flex items-center justify-center gap-2">
+          {settings?.logoUrl ? (
+            <img src={settings.logoUrl} alt="Logo" className="h-8 w-auto object-contain hidden sm:block" />
+          ) : (
+            <div className="hidden sm:flex w-8 h-8 bg-black items-center justify-center font-display font-bold text-white text-sm">
+              {settings?.workshopName?.charAt(0) || "B"}
+            </div>
+          )}
+          <span className="font-display font-bold text-xl uppercase tracking-widest text-center">{settings?.workshopName}</span>
+        </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-gray-100 rounded-md p-0.5">
             <button onClick={() => setLanguage('en')} className={`px-2.5 py-1 text-[10px] font-bold uppercase transition-all rounded-sm ${language === 'en' ? 'bg-black text-white shadow-sm' : 'text-gray-500 hover:text-black'}`}>EN</button>
